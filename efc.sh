@@ -30,7 +30,7 @@ while test $# -gt 0; do
             fi
             
             
-            sh ./efc_encrypt_all.sh "$1"
+            sh efc_encrypt_all.sh "$1"
             
             # TODO ZIP folder & encrypt
             

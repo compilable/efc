@@ -1,7 +1,7 @@
 #1/bin/bash
 
 # efc_single [ encrypt / decrypt a single file]
-# Version 1.0
+# Version 1.0.1
 
 # Atomated script to symmetrically encrypt / decrypt a single file.
 # Features:
@@ -155,7 +155,7 @@ while test $# -gt 0; do
             echo -e 'invalid options:
         \n\t -ed : encrypt directory
         \n\t -ef : encrypt individual file
-            \n\t -d : decrypt file'
+            \n\t -df : decrypt file'
             exit
         ;;
     esac

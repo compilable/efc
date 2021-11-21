@@ -5,7 +5,13 @@ Utility script to encrypt/decrypt a single file of a folder tree using standard 
 
 `./efc.sh <FOLDER/FILE/PATH>`
 
-## Windows configuration using gitbash
+## Test functionality:
+Use the files inside the `test` folder.
+
+`./efc.sh test`
+
+
+## Windows configuration using gitbash:
 
 Need to add the folder location to the path.
 

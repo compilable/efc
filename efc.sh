@@ -2,6 +2,7 @@
 
 # efc_single [ encrypt / decrypt a single file]
 # Version 1.0.2
+# MIT license (MIT)
 
 # Util script to symmetrically encrypt / decrypt individual file or given folder using the gpg lib.
 : '
@@ -20,39 +21,39 @@ count=0
 
 user_input() {
 
-    read -p "Delete the source file ? (yes/no) " isDelete
+    read -p "Delete the source file ? (yes/no) : " isDelete
 
     if [ $isDelete == 'yes' ]; then
-        echo "source file will be DELETED!"
+        echo -e ' \t' "source file will be DELETED!"
     fi
 
     while true; do
-        read -p "Encrypt or Decrypt ? (e/d)" isEnrypt
+        read -p "Encrypt or Decrypt ? (e/d) : " isEnrypt
 
         # (2) handle the input we were given
         case $isEnrypt in
         [eE]*)
-            echo "all the files will be Encrypted!"
+            echo -e ' \t'  "all the files will be Encrypted!"
             break
             ;;
 
         [dD]*)
-            echo "all the files will be Decrypted!"
+            echo -e ' \t'  "all the files will be Decrypted!"
             break
             ;;
 
-        *) echo "please enter e for Encrypt  or d for Decrypt." ;;
+        *) echo -e ' \t'  "please enter e for Encrypt  or d for Decrypt." ;;
         esac
     done
 
-    echo -n "Provide the password for the operation : ":
+    echo -n "Provide the password for the operation : "
     read -s password
 
     if [ -z "$password" ]; then
         echo "provided passward is empty, exiting."
         exit
     else
-        echo "starting the operation using the provided passward..."
+        echo -e ' \t'  "starting the operation using the provided passward..."
     fi
 
 }

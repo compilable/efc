@@ -2,6 +2,7 @@
 
 # efc_lib.sh [ encrypt / decrypt files.]
 # Version 1.1
+# MIT license (MIT)
 
 # functions using the gpg lib to symmetrically encrypt / decrypt individual file.
 

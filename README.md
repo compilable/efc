@@ -1,16 +1,13 @@
-# Bash Script to symmetrically encrypt the files/folder content with a given password.
+# Bash Script to symmetrically Encrypt the Files/Folder Content. (EFC)
 
-# ./efc.sh
-efc_single.sh : encrypt / decrypt a single file of a folder tree.
+## Run the script:
+Utility script to encrypt/decrypt a single file of a folder tree using standard gpg lib.
 
-* -ed : encrypt directory
-* -ef : encrypt individual file
-* -d : decrypt file'
-
+`./efc.sh <FOLDER/FILE/PATH>`
 
 ## Windows configuration using gitbash
 
-Need to add the folder locaion to path.
+Need to add the folder location to the path.
 
 1. Create a bash profile.
 `nano ~/.profile`
@@ -20,3 +17,14 @@ Need to add the folder locaion to path.
 
 3. Close and open a new bash shell.
 
+## Dependencies:
+- gpg (GnuPG) 2.2.19
+- libgcrypt 1.8.5
+
+## Reference:
+- [Capture gpg outcome into a file](https://lists.gnupg.org/pipermail/gnupg-users/2003-February/017167.html  "test")
+- [gnupg - official](https://www.gnupg.org/download/ "gnupg - official")
+
+
+## License:
+- MIT license (MIT)

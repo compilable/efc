@@ -1,162 +1,104 @@
-#1/bin/bash
+#!/bin/bash
 
 # efc_single [ encrypt / decrypt a single file]
-# Version 1.0.1
+# Version 1.0.2
 
-# Atomated script to symmetrically encrypt / decrypt a single file.
-# Features:
-## Accept user given path to a folder.
-## Request user to enter a password.
-## Ceate a zip file of the given folder.
-## Encrypt the zip file.
-## Generate the MD5 of the ZIP file.
-## Create a TXT file containing the MD5, Name and Password in user Home directory.
-## User can choose the delete the source files.
-## Provided password will be saved to a text file.
+# Util script to symmetrically encrypt / decrypt individual file or given folder using the gpg lib.
+: '
+Features:
+- Accept user given path to a folder or a file.
+- Request user to enter a password.
+- Encrypt/Decrypt file(s).
+- User can choose the delete the source files.
+'
 
-# Input parameters
-## Folder/File path
+# Load the util functions
+source "efc_lib.sh"
 
 ts=$(date +%s)
+count=0
 
-while test $# -gt 0; do
-    case "$1" in
-        -ed)
-            shift
-            
-            if [ ! -d "$1" ]; then
-                echo "folder doesn't exist."
-                break
+user_input() {
+
+    read -p "Delete the source file ? (yes/no) " isDelete
+
+    if [ $isDelete == 'yes' ]; then
+        echo "source file will be DELETED!"
+    fi
+
+    while true; do
+        read -p "Encrypt or Decrypt ? (e/d)" isEnrypt
+
+        # (2) handle the input we were given
+        case $isEnrypt in
+        [eE]*)
+            echo "all the files will be Encrypted!"
+            break
+            ;;
+
+        [dD]*)
+            echo "all the files will be Decrypted!"
+            break
+            ;;
+
+        *) echo "please enter e for Encrypt  or d for Decrypt." ;;
+        esac
+    done
+
+    echo -n "Provide the password for the operation : ":
+    read -s password
+
+    if [ -z "$password" ]; then
+        echo "provided passward is empty, exiting."
+        exit
+    else
+        echo "starting the operation using the provided passward..."
+    fi
+
+}
+
+process_folder() {
+    for file in $1/**; do
+        if [[ -d "$file" ]]; then
+            echo "reading the folder : $file"
+        elif [[ -f "$file" ]]; then
+
+            if [[ $isEnrypt == 'e' ]]; then
+                encrypt "$file" "$password" $isDelete
             fi
-            
-            
-            sh efc_encrypt_all.sh "$1"
-            
-            # TODO ZIP folder & encrypt
-            
-            shift
-        ;;
-        -ef)
-            shift
-            
-            if [ ! -f "$1" ]; then
-                echo "file doesn't exist."
-                break
+
+            if [[ $isEnrypt == 'd' ]]; then
+                decrypt "$file" "$password" $isDelete
             fi
-            
-            
-            echo -n Password:
-            read -s password
-            
-            
-            echo "Delete the source file ? (yes/no)"
-            
-            read isDelete
-            
-            if [ $# -eq 0 ]
-            then
-                echo "No arguments provided, source is NOT deleted."
-            fi
-            
-            
-            if [ $# == 'yes' ]
-            then
-                echo "source file will be DELETED!"
-            fi
-            
-            FILE_PATH=$1
-            basename "$FILE_PATH"
-            FILE=$(basename -- "$FILE_PATH")
-            FILE_NAME=$(basename -- "$FILE_PATH").gpg
-            echo "Creating the secure file : $FILE_PATH"
-            
-            gpg --quiet --yes --batch --passphrase "$password" -c "$FILE_PATH"
-            
-            md5=`md5sum "$FILE_PATH"`
-            
-            echo "Generating Checksum : $md5"
-            
-            keyFile=~/"$FILE"_$ts.kye.efc
-            
-            echo "Password will be backup in : ~/$keyFile"
-            echo "$md5 -> $password" > "$keyFile"
-            
-            echo "Removing the original..."
-            
-            
-            if [ $isDelete == 'yes' ]
-            then
-                echo "removing the original file $1"
-                rm -rf "$1"
-            fi
-            
-            shift
-        ;;
-        -df)
-            shift
-            
-            if [ ! -f "$1" ]; then
-                echo "file doesn't exist."
-                break
-            fi
-            
-            
-            echo -n Password:
-            read -s password
-            
-            FILE_PATH=$1
-            basename "$FILE_PATH"
-            FILE=$(basename -- "$FILE_PATH")
-            FILE_NAME=$(basename -- "$FILE_PATH").gpg
-            echo "Decrypting the secure file : $FILE_NAME"
-            
-            gpg --quiet --yes --batch --passphrase "$password" "$FILE_PATH"
-            
-            
-            echo "\n Delete the source file ? (yes/no)"
-            
-            read isDelete
-            
-            if [ $# -eq 0 ]
-            then
-                echo "No arguments provided, source is NOT deleted."
-            fi
-            
-            
-            if [ $# == 'yes' ]
-            then
-                echo "source file will be DELETED!"
-            fi
-            
-            if [ $isDelete == 'yes' ]
-            then
-                echo "removing the original file $1"
-                rm -rf "$1"
-            fi
-            
-            
-            shift
-        ;;       
-        -dd)
-            shift
-            
-            if [ ! -d "$1" ]; then
-                echo "folder doesn't exist."
-                break
-            fi
-            
-            
-            sh ./efc_encrypt_all.sh "$1"
-            
-            
-            shift
-        ;;
-        *)
-            echo -e 'invalid options:
-        \n\t -ed : encrypt directory
-        \n\t -ef : encrypt individual file
-            \n\t -df : decrypt file'
-            exit
-        ;;
-    esac
-done
+
+        fi
+    done
+}
+
+process_file() {
+
+    if [[ $isEnrypt == 'e' ]]; then
+        encrypt "$1" "$password" $isDelete
+    fi
+
+    if [[ $isEnrypt == 'd' ]]; then
+        decrypt "$1" "$password" $isDelete
+    fi
+
+}
+
+if [ $# -eq 0 ]; then
+    echo "No folder/file provided, exiting."
+    exit 1
+elif [[ -d $1 ]]; then
+    echo "processing the directory : $1"
+    user_input
+    process_folder "$1"
+elif [[ -f $1 ]]; then
+    user_input
+    process_file "$1"
+else
+    echo "invalid input, must be a folder or a file : $1"
+fi
+
+echo -e ' \t' "total of $count files processed"

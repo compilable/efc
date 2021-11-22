@@ -9,7 +9,7 @@
 shopt -s globstar
 
 decrypt() {
-    echo "decrypting the file: $1"
+     echo -e ' \t' "decrypting the file: $1"
 
     # capture the output to a temp. file.
     gpg --quiet --yes --batch --passphrase "$2" "$1" 2>>"$1_out"
@@ -30,12 +30,12 @@ decrypt() {
 
 encrypt() {
 
-    echo "encrypting the file: $1"
+    echo -e ' \t' "encrypting the file: $1"
 
     gpg --quiet --yes --batch --passphrase "$2" -c "$1"
 
     if [ $3 == 'yes' ]; then
-        echo -e ' \t' "removing the original file $1"
+        echo -e ' \t' "removing the original file: $1"
         rm -rf "$1"
     fi
 

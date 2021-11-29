@@ -2,7 +2,7 @@
 # Bash Script to symmetrically Encrypt the Files/Folder Content. (EFC)
 
 ## Usage:
-Utility script to encrypt/decrypt a single file of a folder tree using standard gpg lib.
+Utility script to encrypt/decrypt a single file(s) or folder tree using standard gpg lib. Supports folder archiving using `tar`.
 
 ```bash
 ./efc.sh <FOLDER/FILE/PATH>
@@ -36,6 +36,7 @@ export PATH=$PATH:"LOCATION/EFC"
 ## Dependencies:
 - gpg (GnuPG) [2.2.19, 2.2.27]
 - libgcrypt [1.8.5 , 1.9.2]
+- tar (GNU tar) [1.34]
 
 
 ## Reference:

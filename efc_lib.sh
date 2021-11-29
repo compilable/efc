@@ -9,7 +9,9 @@
 shopt -s globstar
 
 decrypt() {
-     echo -e ' \t' "decrypting the file: $1"
+    echo -e ' \t' "decrypting the file: $1"
+
+    local return_status=0
 
     # capture the output to a temp. file.
     gpg --quiet --yes --batch --passphrase "$2" "$1" 2>>"$1_out"
@@ -22,10 +24,12 @@ decrypt() {
             echo -e ' \t' "removing the original file $1"
             rm -rf "$1"
         fi
-        count=$((count + 1))
+        return_status=1
     fi
 
     rm -rf "$1_out"
+
+    return $return_status
 }
 
 encrypt() {
@@ -39,5 +43,5 @@ encrypt() {
         rm -rf "$1"
     fi
 
-    count=$((count + 1))
+    return 1
 }

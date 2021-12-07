@@ -113,34 +113,36 @@ process_file() {
 
 }
 
+print_version_info() {
+    echo -e "efc version : $VERSION \n"
+    printf "bash version : %s\n" $BASH_VERSION
+    echo -e "gpg version : " $(gpg --version | sed -n 1p)
+    echo -e "libgcrypt version : " $(gpg --version | sed -n 2p)
+    echo -e "tar version : " $(tar --version | sed -n 1p)
+    echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
+    echo -e "Written by compilable"
+}
+
+zip_folder() {
+    if [ "$zipFolders" == 'yes' ]; then
+        echo "Start archiving process..."
+        zip_all_folders "$1" $isDelete
+    fi
+}
 start_process() {
     if [ $# -eq 0 ]; then
         echo "No folder/file provided, exiting."
         exit 1
 
     elif [[ "$1" == '--version' ]]; then
-        echo -e "efc version : $VERSION \n"
-        printf "bash version : %s\n" $BASH_VERSION
-        echo -e "gpg version : " $(gpg --version | sed -n 1p)
-        echo -e "libgcrypt version : " $(gpg --version | sed -n 2p)
-        echo -e "tar version : " $(tar --version | sed -n 1p)
-        echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
-        echo -e "Written by compilable"
+        print_version_info
         exit 1
     elif [[ -d "$1" ]]; then
         echo "Using the directory : $1"
         user_input "$1"
-
         echo -e "\n"
-
-        if [ "$zipFolders" == 'yes' ]; then
-            echo "Start archiving process..."
-
-            zip_all_folders "$1" $isDelete
-        fi
-
+        zip_folder "$1"
         echo -e "\n"
-
         process_all_files_in_dir "$1"
     elif [[ -f $1 ]]; then
         echo "Using the file : $1"
@@ -151,4 +153,4 @@ start_process() {
     fi
 }
 
-start_process $1
+start_process "$1"

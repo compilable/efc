@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # efc_single [ encrypt / decrypt a single file]
-# Version 1.0.2
 # MIT license (MIT)
 
 # Util script to symmetrically encrypt / decrypt individual file or given folder using the gpg lib.
@@ -13,125 +12,137 @@ Features:
 - User can choose the delete the source files.
 '
 
+# Script version
+VERSION=1.0.3
+
 # Load the util functions
 source "efc_lib.sh"
 
 ts=$(date +%s)
 
 user_input() {
-    
-    
-    if [[ -d $1 ]]; then
-        
-        read -p "Do you want to zip folders found found in the path ? (yes/no) [no] : " zipFolders
-        
-        if [ -z "$zipFolders" ] && [ "$zipFolders" != 'yes' ]; then
-            echo -e ' \t' "content will be encrypted as seperate files."
-        else
-            echo -e ' \t' "content will be archived and before the encryption."
-        fi
-        
-    fi
-    
+
     read -p "Delete the source file ? (yes/no) : " isDelete
-    
+
     if [ $isDelete == 'yes' ]; then
         echo -e ' \t' "source file will be DELETED!"
     fi
-    
-    
+
     while true; do
         read -p "Encrypt or Decrypt ? (e/d) : " isEnrypt
-        
+
         # (2) handle the input we were given
         case $isEnrypt in
-            [eE]*)
-                echo -e ' \t' "all the files will be Encrypted!"
-                break
+        [eE]*)
+            echo -e ' \t' "all the files will be Encrypted!"
+
+            if [[ -d $1 ]]; then
+
+                read -p "Do you want to zip folders found found in the path ? (yes/no) [no] : " zipFolders
+
+                if [ -z "$zipFolders" ] && [ "$zipFolders" != 'yes' ]; then
+                    echo -e ' \t' "content will be encrypted as seperate files."
+                else
+                    echo -e ' \t' "content will be archived and before the encryption."
+                fi
+
+            fi
+
+            break
             ;;
-            
-            [dD]*)
-                echo -e ' \t' "all the files will be Decrypted!"
-                break
+
+        [dD]*)
+            echo -e ' \t' "all the files will be Decrypted!"
+            break
             ;;
-            
-            *) echo -e ' \t' "please enter e for Encrypt  or d for Decrypt." ;;
+
+        *) echo -e ' \t' "please enter e for Encrypt  or d for Decrypt." ;;
         esac
     done
-    
+
     echo -n "Provide the password for the operation : "
     read -s password
-    
+
     if [ -z "$password" ]; then
         echo "provided password is empty, exiting."
         exit
     else
         echo -e ' \n\t' "starting the operation using the provided password."
     fi
-    
+
 }
 
 process_all_files_in_dir() {
     find "$1" -print |
-    while read file; do
-        echo "FILE :: $file"
-        
-        if [[ -d $file ]]; then
-            echo "Insdie : DIR  $file"
-        else
-            
-            if [[ $isEnrypt == 'e' ]]; then
-                #encrypt "$file" "$password" $isDelete
-                echo "ENC" $file
-                encrypt "$file" "$password" $isDelete
-                #increase_count $?
-                ((counter++))
+        while read file; do
+            echo "FILE :: $file"
+
+            if [[ -d $file ]]; then
+                echo "Insdie : DIR  $file"
+            else
+
+                if [[ $isEnrypt == 'e' ]]; then
+                    #encrypt "$file" "$password" $isDelete
+                    echo "ENC" $file
+                    encrypt "$file" "$password" $isDelete
+                    #increase_count $?
+                    ((counter++))
+                fi
+
+                if [[ $isEnrypt == 'd' ]]; then
+
+                    echo "DEC" $file
+                    decrypt "$file" "$password" $isDelete
+                    ((counter++))
+                fi
             fi
-            
-            if [[ $isEnrypt == 'd' ]]; then
-                
-                echo "DEC" $file
-                decrypt "$file" "$password" $isDelete
-                ((counter++))
-            fi
-        fi
-        
-    done
-    
+
+        done
+
 }
 
 process_file() {
-    
+
     if [[ $isEnrypt == 'e' ]]; then
         encrypt "$1" "$password" $isDelete
     fi
-    
+
     if [[ $isEnrypt == 'd' ]]; then
         decrypt "$1" "$password" $isDelete
     fi
-    
+
 }
 
 start_process() {
     if [ $# -eq 0 ]; then
         echo "No folder/file provided, exiting."
         exit 1
-        elif [[ -d "$1" ]]; then
+
+    elif [[ "$1" == '--version' ]]; then
+        echo -e "efc version : $VERSION \n"
+        printf "bash version : %s\n" $BASH_VERSION
+        echo -e "gpg version : " $(gpg --version | sed -n 1p)
+        echo -e "libgcrypt version : " $(gpg --version | sed -n 2p)
+        echo -e "tar version : " $(tar --version | sed -n 1p)
+        echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
+        echo -e "Written by compilable"
+        exit 1
+    elif [[ -d "$1" ]]; then
         echo "Using the directory : $1"
         user_input "$1"
-        
+
         echo -e "\n"
-        
+
         if [ "$zipFolders" == 'yes' ]; then
             echo "Start archiving process..."
-            
+
             zip_all_folders "$1" $isDelete
         fi
-        
+
         echo -e "\n"
-        
+
         process_all_files_in_dir "$1"
-        elif [[ -f $1 ]]; then
+    elif [[ -f $1 ]]; then
         echo "Using the file : $1"
         user_input $1
         process_file "$1"

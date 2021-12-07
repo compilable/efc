@@ -14,7 +14,7 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 - Nothing.
 
 ### Fixed
-- Nothing.
+- Windows support for folders with spaces
 
 
 ## 1.0.2 - 2021-11-28

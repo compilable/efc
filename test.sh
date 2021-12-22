@@ -102,4 +102,43 @@ check_path() {
     fi
 }
 
-check_path "$1"
+#check_path "$1"
+
+ignore_file_folder() {
+    PROP_FILE=test/test.prop
+    file_type_key="ignore_types"
+    folder_type_key="ignore_dir_names"
+
+    file_types=()
+    value=$(cat ${PROP_FILE} | grep $file_type_key | cut -d'=' -f2)
+    IFS=',' read -ra file_types <<<"$value"
+
+    folder_types=()
+    value=$(cat ${PROP_FILE} | grep $folder_type_key | cut -d'=' -f2)
+    IFS=',' read -ra folder_types <<<"$value"
+
+    file_to_search=""
+
+    if [[ -d "$1" ]]; then
+        file_to_search=$(basename "$1")
+
+        echo "folder"
+        if printf '%s\n' "${folder_types[@]}" | grep -Fxq "$file_to_search"; then
+            echo "folder to ignore : $1"
+            ignore=1
+        fi
+
+    elif [[ -f "$1" ]]; then
+        file_to_search="${1##*.}"
+
+        echo "file"
+        if printf '%s\n' "${file_types[@]}" | grep -Fxq "$file_to_search"; then
+            echo "file to ignore : $1"
+            ignore=1
+        fi
+    fi
+}
+
+ignore_file_folder "/c/Users/d861180/Desktop/efc/test/spinner-2x.gif"
+
+echo $ignore

@@ -16,7 +16,8 @@ Features:
 VERSION=1.0.3
 
 # Load the util functions
-source "efc_lib.sh"
+source_path=$(pwd)
+source "$source_path/efc_lib.sh"
 
 ts=$(date +%s)
 

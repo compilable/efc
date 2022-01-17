@@ -17,16 +17,23 @@ Use the files inside the `test` folder.
 
 ## Windows configuration using Git for Windows (Git SCM):
 
-0. Make sure to install the `Git for Windows` which provides a BASH emulation that comes with GnuPG pre-installed.
+Need to install the `Git for Windows` which provides a BASH emulation that comes with GnuPG pre-installed.
+
+## To run the `efc` script from outside the source location: 
 
 1. Create a bash profile.
 ```bash
 nano ~/.profile
+
+or 
+
+vim ~/.profile
 ```
 
-2. Add the path of the efc folder to the $PATH
+2. Create a path variable named `EFC_PATH` pointing to the the EFC source location and append to the `PATH` variable:
 ```bash
-export PATH=$PATH:"LOCATION/EFC"
+export EFC_PATH="LOCATION_TO_SOURCE_FOLDER"
+export PATH=$PATH:$EFC_PATH
 ```
 
 3. Close and open a new bash shell.

@@ -38,7 +38,7 @@ export PATH=$PATH:$EFC_PATH
 
 3. Close and open a new bash shell.
 
-4. Run `./efc.sh` from Gitbash terminal.
+4. Check the instalation by running `efc.sh --version` on a gitbash terminal.
 
 ## Dependencies:
 - gpg (GnuPG) [2.2.19, 2.2.27]

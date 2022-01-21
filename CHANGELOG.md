@@ -2,6 +2,22 @@ All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 
+## 1.0.5 - 2022-Jan-21
+
+### Added
+- Create a script to combine all the scripts into once script which can be executed withouth path dependencies.
+- Create a build script to release the latest script.
+
+### Deprecated
+- Nothing.
+
+### Removed
+- Nothing.
+
+### Fixed
+- Nothing
+
+
 ## 1.0.4 - 2021-12-07
 
 ### Added

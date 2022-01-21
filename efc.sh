@@ -13,7 +13,7 @@ Features:
 '
 
 # Script version
-VERSION=1.0.4
+VERSION=1.0.5
 
 # Load the util functions
 dependencies_loaded=0
@@ -181,13 +181,11 @@ start_process() {
     fi
 }
 
-
-load_dependencies
+file_has_mearged() { declare -F encrypt > /dev/null; }
+dependencies_loaded=$(file_has_mearged && echo 1 || echo 0)
 
 if [ $dependencies_loaded -eq 0 ]; then
-    echo -e '\n' "ERROR: missing dependencies, try the compressed efc script to run without loading dependencies."
-else
-    start_process "$1"
+    load_dependencies
 fi
 
-
+start_process "$1"

@@ -5,3 +5,9 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 ### Ignore files/folders using a given list (read from a props file)
 
 ### Create a script to combine all the scripts into once script which can be executed withouth path dependencies.
+
+### Confirm the new password when encrypting.
+
+### Print summary message after the operation (Total count of files, successfully completed files, failed files etc )
+
+### create a build script to release the latest script.

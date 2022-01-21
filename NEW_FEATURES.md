@@ -7,3 +7,5 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 ### Confirm the new password when encrypting.
 
 ### Print summary message after the operation (Total count of files, successfully completed files, failed files etc )
+
+### Release as a portable windows application with gitbash.

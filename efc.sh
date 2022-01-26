@@ -101,17 +101,20 @@ user_input() {
 
     done
 
-    while true; do
+    if [ "$isEnrypt" == "e" ]; then
 
-        read -sp "Confirm the password :" password_confirmed
+        while true; do
 
-        if [ "$password" == "$password_confirmed" ]; then
-            break
-        else
-            echo -e ' \n\t' "password does not match, please confirm the password."
-        fi
+            read -sp "Confirm the password :" password_confirmed
 
-    done
+            if [ "$password" == "$password_confirmed" ]; then
+                break
+            else
+                echo -e ' \n\t' "password does not match, please confirm the password."
+            fi
+
+        done
+    fi
 
     echo -e ' \n\t' "starting the operation using the provided password." '\n'
 

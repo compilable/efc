@@ -2,6 +2,21 @@ All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 
+## EFC - version : 1.0.6 (2022-Jan-26)
+
+### Added
+- Confirm the new password when encrypting.
+
+### Deprecated
+- Nothing.
+
+### Removed
+- Nothing.
+
+### Fixed
+- Nothing
+
+
 ## EFC - version : 1.0.5 (2022-Jan-21)
 
 ### Added

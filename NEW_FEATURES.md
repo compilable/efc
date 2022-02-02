@@ -8,3 +8,13 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 ### Print summary message after the operation (Total count of files, successfully completed files, failed files etc )
 
 ### Release as a portable windows application with gitbash.
+
+### Fix typo. (password confirmation)
+
+### Warning on weak passwords
+
+### Update the Readme on Linux instalation (portable & non-portable installation)
+
+### Include the License and Readme document on bin folder for each distribution.
+
+### Install script to pull the latest release from the repo.

@@ -15,7 +15,7 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 - Script version functionality from main script.
 
 ### Fixed
-- Nothing
+- Fix typo. (password confirmation)
 
 
 ## EFC - version : 1.0.6 (2022-Jan-26)

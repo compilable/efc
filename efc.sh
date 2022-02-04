@@ -161,15 +161,7 @@ process_file() {
 
 }
 
-print_version_info() {
-    echo -e "efc version : $VERSION \n"
-    printf "bash version : %s\n" $BASH_VERSION
-    echo -e "gpg version : " $(gpg --version | sed -n 1p)
-    echo -e "libgcrypt version : " $(gpg --version | sed -n 2p)
-    echo -e "tar version : " $(tar --version | sed -n 1p)
-    echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
-    echo -e "Written by compilable"
-}
+
 
 zip_folder() {
     if [ "$zipFolders" == 'yes' ]; then

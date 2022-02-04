@@ -76,3 +76,24 @@ zip_all_folders(){
         
     done
 }
+
+
+read_version(){
+    while IFS= read -r line; do 
+        if [[ "$line" == ???EFC* ]]
+        then
+            echo -e "\n$line"
+            break
+        fi
+    done < CHANGELOG.md
+}
+
+print_version_info() {
+    read_version
+    echo -e "bash version : %s $BASH_VERSION"
+    echo -e "gpg version : " $(gpg --version | sed -n 1p)
+    echo -e "libgcrypt version : " $(gpg --version | sed -n 2p)
+    echo -e "tar version : " $(tar --version | sed -n 1p)
+    echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
+    echo -e "Written by compilable"
+}

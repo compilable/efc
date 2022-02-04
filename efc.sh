@@ -63,10 +63,10 @@ user_input() {
 
             if [[ -d $1 ]]; then
 
-                read -p "Do you want to zip folders found found in the path ? (yes/no) [no] : " zipFolders
+                read -p "Do you want to zip folders found in the path ? (yes/no) [no] : " zipFolders
 
                 if [ -z "$zipFolders" ] && [ "$zipFolders" != 'yes' ]; then
-                    echo -e ' \t' "content will be encrypted as seperate files."
+                    echo -e ' \t' "content will be encrypted as separate files."
                 else
                     echo -e ' \t' "content will be archived and before the encryption."
                 fi

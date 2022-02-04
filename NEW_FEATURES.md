@@ -9,8 +9,6 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 ### Release as a portable windows application with gitbash.
 
-### Fix typo. (password confirmation)
-
 ### Warning on weak passwords
 
 ### Update the Readme on Linux instalation (portable & non-portable installation)

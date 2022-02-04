@@ -15,6 +15,4 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 ### Update the Readme on Linux instalation (portable & non-portable installation)
 
-### Include the License and Readme document on bin folder for each distribution.
-
 ### Install script to pull the latest release from the repo.

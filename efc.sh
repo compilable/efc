@@ -12,9 +12,6 @@ Features:
 - User can choose the delete the source files.
 '
 
-# Script version
-VERSION=1.0.5
-
 # Load the util functions
 dependencies_loaded=0
 

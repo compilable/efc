@@ -2,6 +2,22 @@ All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 
+## EFC - version : 1.0.7 (2022-Feb-04)
+
+### Added
+- Version updated based on latest release number.
+- Include the License and Readme document on bin folder for each distribution.
+
+### Deprecated
+- Nothing.
+
+### Removed
+- Script version functionality from main script.
+
+### Fixed
+- Nothing
+
+
 ## EFC - version : 1.0.6 (2022-Jan-26)
 
 ### Added

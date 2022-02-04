@@ -23,10 +23,13 @@ read version
 cat efc_lib.sh >> "bin/efc_min.sh"
 cat efc.sh >> "bin/efc_min.sh"
 
-# 5 marking the script with the version 
+# 5 marking the script with the version & copy the license and Readme
 
 mv bin/efc.sh "bin/efc_$version.sh"
 mv bin/efc_min.sh "bin/efc_$version.min.sh"
+
+cp License "bin/"
+cp README.md "bin/"
 
 # 6 compress the bin folder into release folder
 

@@ -16,3 +16,5 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 ### Install script to pull the latest release from the repo.
 
 ### Use the password hash for encryption insted of direct password. (major release)
+
+### anonymize File/Folder names.

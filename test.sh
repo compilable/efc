@@ -13,7 +13,7 @@ read_version() {
 
 obscure_file_name() {
     # generate a string containing : random_text ;-; md5sum ;-; file_name ;-;
-    
+
     checksum=$(md5sum "$1")
     checsum_data=(${checksum//;/ })
     random_name=$(xxd -l 12 -c 12 -p </dev/random)
@@ -21,71 +21,74 @@ obscure_file_name() {
     echo "$obscured_text"
 }
 
-process_all_files_in_dir() {
-    
+generate_index_file() {
+
     # 1 create a file based on . ts
     index_file="$1.$(date +%Y%m%d%H%M%S)"
     echo "$1" >"$index_file"
     echo -e "INFO :: index file created : $index_file"
-    
+
     file_count=0
-    
+
     # 2 append each file details
     find "$1" -print |
-    {
-        while read file; do
-            echo "RESOURCE :: $file"
-            
-            if [[ -d $file ]]; then
-                echo -e "\t Insdie : DIR  $file"
-            else
-                
-                if [[ $isEnrypt == 'e' ]]; then
-                    
-                    
-                    base_name=$(basename "${file}")
-                    
-                    if [[ "$base_name" == .* ]]; then
-                        echo -e ' \t' "ignoring hidden file $file"
-                        
-                    else
-                        echo -e ' \t' "ENC :: file $file"
-                        result=$(obscure_file_name "$file")
-                        file_data=(${result//;-;/ })
-                        obscre_file_name=$(echo ${file_data[0]} | sed 's/ *$//g')
-                        checksum=$(echo "${file_data[1]}" | sed 's/ *$//g')
-                        echo -e "obscre_file_name=$obscre_file_name , checksum=$checksum , source_file="$file""
-                        
-                        echo "$result" >>$index_file
-                        let file_count=file_count+1
-                        echo "processing the $file_count file."
-                        #encrypt "$file" "$password" $isDelete
-                        
+        {
+            while read file; do
+                echo "RESOURCE :: $file"
+
+                if [[ -d $file ]]; then
+                    echo -e "\t Insdie : DIR  $file"
+
+                else
+
+                    if [[ $isEnrypt == 'e' ]]; then
+
+                        base_name=$(basename "${file}")
+
+                        if [[ "$base_name" == .* ]]; then
+                            echo -e ' \t' "ignoring hidden file $file"
+
+                        else
+                            echo -e ' \t' "ENC :: file $file"
+                            result=$(obscure_file_name "$file")
+                            file_data=(${result//;-;/ })
+                            obscred_file_name=$(echo ${file_data[0]} | sed 's/ *$//g')
+                            checksum=$(echo "${file_data[1]}" | sed 's/ *$//g')
+
+                            DIR="$(dirname "${file}")" 
+                            echo -e "obscre_file_name=$DIR/$obscred_file_name , checksum=$checksum , source_file="$file""
+                            mv "$file" "$DIR/$obscred_file_name"
+
+                            echo "$result" >>$index_file
+                            let file_count=file_count+1
+                            echo "processing the $file_count file."
+                            #encrypt "$file" "$password" $isDelete
+
+                        fi
                     fi
+
+                    if [[ $isEnrypt == 'd' ]]; then
+                        echo -e ' \t' "DEC :: file $file"
+                        #decrypt "$file" "$password" $isDelete
+                    fi
+
                 fi
-                
-                if [[ $isEnrypt == 'd' ]]; then
-                    echo -e ' \t' "DEC :: file $file"
-                    #decrypt "$file" "$password" $isDelete
-                fi
-                
-            fi
-            
-        done
-        
-        echo -e "INFO :: total of $file_count files processed, encrypting the index file."
-        
-        # encrpt the index file with same file name
-        #gpg --output test/test_data/.20220218000221x --quiet --yes --batch --passphrase "123" -c test/test_data/.20220218000221
-        encrpt_decrypt_file "$index_file" "$password" "e"
-    }
+
+            done
+
+            echo -e "INFO :: total of $file_count files processed, encrypting the index file."
+
+            # encrpt the index file with same file name
+            #gpg --output test/test_data/.20220218000221x --quiet --yes --batch --passphrase "123" -c test/test_data/.20220218000221
+            encrpt_decrypt_file "$index_file" "$password" "e"
+        }
 }
 
-encrpt_decrypt_file(){
+encrpt_decrypt_file() {
     # $1 = source file - fq path
     # $2 = password
     # $3 = operation (e/d)
-    
+
     if [ $3 == 'e' ]; then
         echo -e "INFO :: encrypting the index file $1"
         gpg --quiet --yes --batch --passphrase "$2" -a --symmetric --cipher-algo AES256 "$1"
@@ -95,82 +98,123 @@ encrpt_decrypt_file(){
         echo -e "INFO :: decrypting the encrypted index file: $1"
         index_output="$(dirname "${1}")/$(basename "${1%.*}")"
         gpg --output "$index_output" -quiet --yes --batch --passphrase "$2" -a --decrypt "$1" 2>>"$1_out"
-        
+
         if [ -s "$1_out" ]; then
             echo -e ' \t' "invalid key/file is provided!, index file is ignored!"
-        else           
+            return 0
+        else
             echo -e "INFO :: index file is decrypted to : $index_output"
+            export INDEX="$index_output"
+
         fi
-        
+
     fi
-    
+
 }
 
-start_decription_process(){
-    
+start_decription_process() {
+
+    index_file=''
+
     if [[ -d "$1" ]]; then
-        
+
         # find the index file on the given dir. with the timestamp descending order into an array
-        file_list=($(find "$1" -maxdepth 1 -name ".*[0-9]*" -printf "%f  \n"|sort -n -t _ -k 2 -r))
+        file_list=($(find "$1" -maxdepth 1 -name ".*[0-9]*" -printf "%f  \n" | sort -n -t _ -k 2 -r))
         length="${#file_list[@]}"
         latest_index=${file_list[0]}
-        
+
         echo -e "INFO :: reading the the location for index files : $1"
-        
+
         if [ "$length" == 0 ]; then
             echo -e ' \t' "no index files found, decrypting all the files.."
-            elif [  "$length" == 1 ]; then
+        elif [ "$length" == 1 ]; then
             echo -e ' \t' "index file found, using the file for decryption, $latest_index"
-            
+
         else
+
             echo -e ' \t' "multiple index files found ($length), using the latest file for decryption =  $latest_index"
         fi
-        
+
         # decrypt the index file
+        #encrpt_decrypt_file "$1$latest_index" "$password" "d"
+        echo "decrypt file..."
         encrpt_decrypt_file "$1$latest_index" "$password" "d"
-        
-        elif [[ -f $1 ]]; then
-        
+        index_file="$1$latest_index"
+        rm -rf "$1$latest_index"_out
+    elif [[ -f $1 ]]; then
+
         # decrypt the index file
+        #encrpt_decrypt_file "$1" "$password" "$1" "d"
+        echo "decrypt folder..."
         encrpt_decrypt_file "$1" "$password" "$1" "d"
-        
+        index_file="$1"
+        rm -rf "$1"_out
     else
         echo -e '\n' "invalid input, must be a folder or a file : $1"
     fi
-    
-    
-    
-    
-    
-    
-    # read file line by line
-    
+
+    #echo "$index_file"
+
 }
 
-
-function load_file_list(){
+function load_file_list() {
     while IFS= read -r line; do
         printf '%s\n' "$line"
-        
+
         result=$line
         file_data=(${result//;-;/ })
         obscre_file_name=$(echo ${file_data[0]} | sed 's/ *$//g')
         checksum=$(echo "${file_data[1]}" | sed 's/ *$//g')
         source_file=$(echo "${file_data[2]}" | sed 's/ *$//g')
         echo -e "obscre_file_name=$obscre_file_name , checksum=$checksum , source_file="$source_file" \n"
-        
-    done < "$1"
+
+    done <"$1"
 }
 
+function decrypt_index_content() {
+    echo "$INDEX"
+
+    if [ -z "${INDEX}" ]; then
+        echo "no index file found, exiting"
+        return
+    fi
+
+    # read file line by line
+    while IFS= read -r line; do
+        echo "read the line : $line"
+
+        is_valid_line=$(echo "$line" | grep -o " ;-; " | wc -l)
+
+        if [ $is_valid_line == 3 ]; then
+            echo -e "\tdecrypting the file : $line"
+
+            IFS=';' read -ra obscre_file_details <<<"$line"
+            # random_text ;-; md5sum ;-; file_name ;-;
+
+            DIR="$(dirname "${obscre_file_details[4]}")" 
+            echo -e "\t\t  obscre_file = $DIR/${obscre_file_details[0]}"
+            echo -e "\t\t  md5sum = ${obscre_file_details[2]}"
+            echo -e "\t\t  file_name = ${obscre_file_details[4]}"
+
+            src=$(echo "$DIR/${obscre_file_details[0]}" | xargs)
+            des=$(echo "${obscre_file_details[4]}" | xargs)
+            mv "$src" "$des"
+
+        else
+            echo "ignoring the line due to content format : $line == $is_valid_line"
+        fi
+
+    done \
+        <"${INDEX}"
+}
 
 password="123x"
 isDelete='no'
 isEnrypt='e'
 
-process_all_files_in_dir $1
+
+#generate_index_file "$1"
 
 start_decription_process "$1"
 
-
-#obscure_file_name "test\test_data\folder name spaces @ ! test ) (\approve-file-16x16-1214257.png"
-
+decrypt_index_content

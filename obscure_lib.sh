@@ -21,19 +21,23 @@
     - 3 remove the decrypted index file.  
 '
 
+source_path=$(pwd)
+source "./efc_lib.sh"
+
 obscure_file_name() {
     # generate a string containing : random_text ;-; md5sum ;-; file_name ;-;
 
     checksum=$(sha1sum "$1")
     checsum_data=(${checksum//;/ })
     random_name=$(xxd -l 12 -c 12 -p </dev/random)
-    local obscured_text="$random_name ;-; ${checsum_data[0]} ;-; $1 ;-; "
+    relative_path=$(echo "$1" | cut -d'/' -f2-)
+    local obscured_text="$random_name ;-; ${checsum_data[0]} ;-; "$relative_path" ;-; "
     echo "$obscured_text"
 }
 
 encrpt_decrypt_index_file() {
     # $1 = source file - fq path
-    # $2 = password
+    # $2 = password (pword_1)
     # $3 = operation (e/d)
 
     if [ $3 == 'e' ]; then
@@ -60,16 +64,39 @@ encrpt_decrypt_index_file() {
 
 }
 
-generate_index_file() {
+construct_index_file() {
+    # $1 = source folder to search and generate the index file content
+    # $2 = pword for the index file
+    # $3 = index file destination
 
-    # 1 create the index file based on current ts
-    index_file="$1.$(date +%Y%m%d%H%M%S)"
-    echo "$1" >"$index_file"
-    echo -e "INFO :: index file created : $index_file"
+    # 1 create the index file.
+    ts=$(date +%Y%m%d%H%M%S)
+    index_file=""
+
+    if [ -z "${3}" ]; then
+        echo -e "INFO :: index file destination not provided, creating the index file in the source folder : $1"
+        index_file="$1/.$ts"
+    else
+        echo -e "INFO :: index file destination provided, creating the index file in : $3"
+        index_file="$3/.$ts"
+    fi
+
+    fq_path=$(echo $(
+        cd "$(dirname "$1")"
+        pwd -P
+    )/$(basename "$1"))
+    echo "$fq_path" >"$index_file"
+
+    if test -f "$index_file"; then
+        echo -e "INFO :: index file created : $index_file"
+    else
+        echo -e "ERROR :: unable to create index file : $index_file"
+        exit
+    fi
 
     file_count=0
 
-    # 2 append each file details
+    # 2 traverse the source folder and append file details (name, hash, obsecred file)
     find "$1" -print |
         {
             while read file; do
@@ -93,11 +120,9 @@ generate_index_file() {
                         #DIR="$(dirname "${file}")"
                         #echo -e "obscre_file_name=$DIR/$obscred_file_name , checksum=$checksum , source_file="$file""
                         #mv "$file" "$DIR/$obscred_file_name"
-
-                        echo "$result" >>$index_file
+                        echo "$result" >>"$index_file"
                         let file_count=file_count+1
                         echo "FILE COUNT : $file_count"
-                        #encrypt "$DIR/$obscred_file_name" "$password" $isDelete
 
                     fi
                 fi
@@ -107,4 +132,228 @@ generate_index_file() {
 
             encrpt_decrypt_index_file "$index_file" "$2" "e"
         }
+}
+
+reconstruct_index_file() {
+    index_file=''
+
+    if [[ -d "$1" ]]; then
+
+        # find the index file on the given dir. with the timestamp descending order into an array
+        file_list=($(find "$1" -maxdepth 1 -name ".*[0-9]*" -printf "%f  \n" | sort -n -t _ -k 2 -r))
+        length="${#file_list[@]}"
+        latest_index=${file_list[0]}
+
+        echo -e "INFO :: reading the the location for index files : $1"
+
+        if [ "$length" == 0 ]; then
+            echo -e ' \t' "no index files found, decrypting all the files.."
+        elif [ "$length" == 1 ]; then
+            echo -e ' \t' "index file found, using the file for decryption, $latest_index"
+
+        else
+
+            echo -e ' \t' "multiple index files found ($length), using the latest file for decryption =  $latest_index"
+        fi
+
+        # decrypt the index file
+        #encrpt_decrypt_file "$1$latest_index" "$password" "d"
+        echo "decrypt file..."
+        encrpt_decrypt_index_file "$1$latest_index" "$2" "d"
+        index_file="$1$latest_index"
+        rm -rf "$1$latest_index"_out
+    elif [[ -f "$1" ]]; then
+
+        # decrypt the index file
+        #encrpt_decrypt_file "$1" "$password" "$1" "d"
+        echo "re-constructing the index file ..."
+        encrpt_decrypt_index_file "$1" "$2" "$1" "d"
+        index_file="$1"
+        rm -rf "$1"_out
+    else
+        echo -e '\n' "invalid index file, must be a folder or a file : $1"
+    fi
+}
+
+decrypt_index_content() {
+    # need to set the terminal level variable INDEX
+
+    echo "$INDEX"
+
+    if [ -z "${INDEX}" ]; then
+        echo "no index file found, exiting"
+        return
+    fi
+
+    # read file line by line
+    while IFS= read -r line; do
+        echo "read the line : $line"
+
+        is_valid_line=$(echo "$line" | grep -o " ;-; " | wc -l)
+
+        if [ $is_valid_line == 3 ]; then
+            echo -e "\tdecrypting the file : $line"
+
+            IFS=';' read -ra obscre_file_details <<<"$line"
+            # random_text ;-; md5sum ;-; file_name ;-;
+
+            DIR="$(dirname "${obscre_file_details[4]}")"
+            echo -e "\t\t  obscre_file = $DIR/${obscre_file_details[0]}"
+            echo -e "\t\t  md5sum = ${obscre_file_details[2]}"
+            echo -e "\t\t  file_name = ${obscre_file_details[4]}"
+
+            src=$(echo "$DIR/${obscre_file_details[0]}" | xargs)
+            des=$(echo "${obscre_file_details[4]}" | xargs)
+
+            #mv "$src" "$des"
+            echo -e ' \t' "DEC :: file $file"
+            #decrypt "$des" "$password" $isDelete
+
+            #encrpt_decrypt_file "$src" "$password" "d"
+            # $1 = source file - fq path
+            # $2 = password
+            # $3 = operation (e/d)
+
+        else
+
+            echo "ignoring the line due to content format : $line == $is_valid_line"
+        fi
+
+    done \
+        <"${INDEX}"
+}
+
+encrypt_index_content() {
+    # need to set the terminal level variable INDEX
+    # $1 = password (pword_2)
+
+    # read the index file,
+    # apply encryption with the obsecred file name
+
+    echo "$INDEX"
+
+    if [ -z "${INDEX}" ]; then
+        echo "no index file found, exiting"
+        return
+    fi
+
+    if [ -z "${1}" ]; then
+        echo "no encryption password provided, exiting"
+        return
+    fi
+
+    # read file line by line
+    while IFS= read -r line; do
+        echo "read the line : $line"
+
+        is_valid_line=$(echo "$line" | grep -o " ;-; " | wc -l)
+
+        if [ $is_valid_line == 3 ]; then
+            echo -e "\tencrypting the file : $line"
+
+            IFS=';' read -ra obscre_file_details <<<"$line"
+            # random_text ;-; md5sum ;-; file_name ;-;
+
+            DIR="$(dirname "${obscre_file_details[4]}")"
+            echo -e "\t\t  obscre_file = $DIR/${obscre_file_details[0]}"
+            echo -e "\t\t  md5sum = ${obscre_file_details[2]}"
+            echo -e "\t\t  file_name = ${obscre_file_details[4]}"
+
+            src=$(echo "$DIR/${obscre_file_details[0]}" | xargs)
+            des=$(echo "${obscre_file_details[4]}" | xargs)
+
+            #mv "$src" "$des"
+            echo -e ' \t' "ENC :: file $file"
+        else
+            echo "ignoring the line due to content format : $line == $is_valid_line"
+        fi
+    done \
+        <"${INDEX}"
+}
+
+process_indexed_content() {
+    # $1 = operation (e/d)
+    # $2 = password (pword_2)
+
+    # need to set the terminal level variable INDEX
+
+    if [ -z "${INDEX}" ]; then
+        echo "no index file found, exiting"
+        return
+    fi
+
+    if [ -z "${1}" ]; then
+        echo "no operation is provided, exiting"
+        return
+    elif [[ "$1" == "e" || "$1" == "d" ]]; then
+        cho "valid operation is provided $1"
+    else
+        echo "no valid operation is provided, exiting"
+        return
+
+    fi
+
+    if [ -z "${2}" ]; then
+        echo "no encryption password provided, exiting"
+        return
+    fi
+
+    echo -e "INFO :: processing the the index file content : $INDEX"
+    fq_path=''
+
+    # read file line by line
+    while IFS= read -r line; do
+        echo -e "INFO :: readin the line : $line"
+
+        is_valid_line=$(echo "$line" | grep -o " ;-; " | wc -l)
+
+        if [ $is_valid_line == 3 ]; then
+
+            IFS=';' read -ra obscre_file_details <<<"$line"
+            # random_text ;-; md5sum ;-; file_name ;-;
+
+            DIR="$(dirname "${obscre_file_details[4]}")"
+            echo -e "\t\t  obscre_file = $DIR/${obscre_file_details[0]}"
+            echo -e "\t\t  md5sum = ${obscre_file_details[2]}"
+            echo -e "\t\t  file_name = ${obscre_file_details[4]}"
+
+            des=$(echo "$DIR/${obscre_file_details[0]}" | xargs)
+            src=$(echo "${obscre_file_details[4]}" | xargs)
+
+            if [ $1 == 'e' ]; then
+                echo -e ' \t' "OBS :: file $fq_path/$src -> $fq_path/$des"
+                echo -e ' \t' "ENC :: file $file"
+
+                encrypt "$fq_path/$src" "${2}" "yes" "$fq_path/$des"
+                # $1 = fq file name
+                # $2 = password
+                # $3 = delete flag (yes/no)
+                # $4 = output file name [optional]
+
+            elif
+                [ $1 == 'd' ]
+            then
+                echo -e ' \t' "OBS :: file $fq_path/$des -> $fq_path/$src"
+                echo -e ' \t' "DEC :: file $file"
+
+                decrypt "$fq_path/$des" "${2}" "yes" "$fq_path/$src"
+                # $1 = fq file name
+                # $2 = password
+                # $3 = delete flag (yes/no)
+                # $4 = output file name [optional]
+            fi
+
+            #mv "$src" "$des"
+
+        else
+            if [ -z "$fq_path" ]; then
+                echo -e "INFO :: setting the FQ path to : $line"
+                fq_path="$line"
+            else
+                echo -e "INFO :: ignoring the line due to content format : $line == $is_valid_line"
+            fi
+        fi
+    done \
+        <"${INDEX}"
+
 }

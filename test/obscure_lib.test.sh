@@ -13,10 +13,10 @@ source_location="test_data/"
 test_file_output="test_data/ENC_ASIC-pre-loader"
 
 # encrypt
-construct_index_file "$source_location" "$pword_1"
-reconstruct_index_file "$source_location" "$pword_1"
-process_indexed_content "e" "$pword_2"
+#construct_index_file "$source_location" "$pword_1"
+#reconstruct_index_file "$source_location" "$pword_1"
+#process_indexed_content "e" "$pword_2"
 
 # decrypt
-reconstruct_index_file "$source_location" "$pword_1"
-process_indexed_content "d" "$pword_2"
+#reconstruct_index_file "$source_location" "$pword_1"
+#process_indexed_content "d" "$pword_2"

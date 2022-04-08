@@ -135,6 +135,8 @@ construct_index_file() {
 }
 
 reconstruct_index_file() {
+    # $1 = source folder to find the index file
+    # $2 = pword for the index file
     index_file=''
 
     if [[ -d "$1" ]]; then
@@ -278,7 +280,7 @@ process_indexed_content() {
     # need to set the terminal level variable INDEX
 
     if [ -z "${INDEX}" ]; then
-        echo "no index file found, exiting"
+        echo "no index file found, exiting. please run the : reconstruct_index_file() prior to this step."
         return
     fi
 
@@ -300,6 +302,7 @@ process_indexed_content() {
 
     echo -e "INFO :: processing the the index file content : $INDEX"
     fq_path=''
+    file_count=0
 
     # read file line by line
     while IFS= read -r line; do
@@ -344,6 +347,8 @@ process_indexed_content() {
             fi
 
             #mv "$src" "$des"
+            let file_count=file_count+1
+            echo "FILE COUNT : $file_count"
 
         else
             if [ -z "$fq_path" ]; then
@@ -356,4 +361,10 @@ process_indexed_content() {
     done \
         <"${INDEX}"
 
+    echo -e "\nINFO :: total of $file_count files processed."
+    echo -e "\nINFO :: deleting the decrypted index file :  ${INDEX}"
+    rm -rf "${INDEX}"
+    if [ $1 == 'e' ]; then
+        echo -e "\t INFO :: please store the index file : ${INDEX}.asc since index file is MANDATORY to decrypt the content."
+    fi
 }

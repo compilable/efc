@@ -72,6 +72,7 @@ construct_index_file() {
     # 1 create the index file.
     ts=$(date +%Y%m%d%H%M%S)
     index_file=""
+    echo -e "\n"
 
     if [ -z "${3}" ]; then
         echo -e "INFO :: index file destination not provided, creating the index file in the source folder : $1"

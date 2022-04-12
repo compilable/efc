@@ -30,7 +30,8 @@ obscure_file_name() {
     checksum=$(sha1sum "$1")
     checsum_data=(${checksum//;/ })
     random_name=$(xxd -l 12 -c 12 -p </dev/random)
-    relative_path=$(echo "$1" | cut -d'/' -f2-)
+    relative_path=$(cd "$(dirname "$1")"; pwd -P)/$(basename "$1")
+    #$(echo "$1" | cut -f2-)
     local obscured_text="$random_name ;-; ${checsum_data[0]} ;-; "$relative_path" ;-; "
     echo "$obscured_text"
 }
@@ -136,35 +137,13 @@ construct_index_file() {
 }
 
 reconstruct_index_file() {
-    # $1 = source folder to find the index file
+    # $1 = encyrpted-index file
     # $2 = pword for the index file
     index_file=''
 
     if [[ -d "$1" ]]; then
-
-        # find the index file on the given dir. with the timestamp descending order into an array
-        file_list=($(find "$1" -maxdepth 1 -name ".*[0-9]*" -printf "%f  \n" | sort -n -t _ -k 2 -r))
-        length="${#file_list[@]}"
-        latest_index=${file_list[0]}
-
-        echo -e "INFO :: reading the the location for index files : $1"
-
-        if [ "$length" == 0 ]; then
-            echo -e ' \t' "no index files found, decrypting all the files.."
-        elif [ "$length" == 1 ]; then
-            echo -e ' \t' "index file found, using the file for decryption, $latest_index"
-
-        else
-
-            echo -e ' \t' "multiple index files found ($length), using the latest file for decryption =  $latest_index"
-        fi
-
-        # decrypt the index file
-        #encrpt_decrypt_file "$1$latest_index" "$password" "d"
-        echo "decrypt file..."
-        encrpt_decrypt_index_file "$1$latest_index" "$2" "d"
-        index_file="$1$latest_index"
-        rm -rf "$1$latest_index"_out
+        echo -e "ERROR :: index file can't be a folder : $1"
+        exit
     elif [[ -f "$1" ]]; then
 
         # decrypt the index file
@@ -321,14 +300,14 @@ process_indexed_content() {
             echo -e "\t\t  md5sum = ${obscre_file_details[2]}"
             echo -e "\t\t  file_name = ${obscre_file_details[4]}"
 
-            des=$(echo "$DIR/${obscre_file_details[0]}" | xargs)
+            des=$(echo "/${obscre_file_details[0]}" | xargs)
             src=$(echo "${obscre_file_details[4]}" | xargs)
 
             if [ $1 == 'e' ]; then
-                echo -e ' \t' "OBS :: file $fq_path/$src -> $fq_path/$des"
+                echo -e ' \t' "OBS :: file $src -> $fq_path/$des"
                 echo -e ' \t' "ENC :: file $file"
 
-                encrypt "$fq_path/$src" "${2}" "yes" "$fq_path/$des"
+                encrypt "$src" "${2}" "yes" "$fq_path/$des"
                 # $1 = fq file name
                 # $2 = password
                 # $3 = delete flag (yes/no)
@@ -337,10 +316,10 @@ process_indexed_content() {
             elif
                 [ $1 == 'd' ]
             then
-                echo -e ' \t' "OBS :: file $fq_path/$des -> $fq_path/$src"
+                echo -e ' \t' "OBS :: file $fq_path/$des -> $src"
                 echo -e ' \t' "DEC :: file $file"
 
-                decrypt "$fq_path/$des" "${2}" "yes" "$fq_path/$src"
+                decrypt "$fq_path/$des" "${2}" "yes" "$src"
                 # $1 = fq file name
                 # $2 = password
                 # $3 = delete flag (yes/no)
@@ -364,7 +343,7 @@ process_indexed_content() {
 
     echo -e "\nINFO :: total of $file_count files processed."
     echo -e "\nINFO :: deleting the decrypted index file :  ${INDEX}"
-    rm -rf "${INDEX}"
+    #rm -rf "${INDEX}"
     if [ $1 == 'e' ]; then
         echo -e "\t INFO :: please store the index file : ${INDEX}.asc since index file is MANDATORY to decrypt the content."
     fi

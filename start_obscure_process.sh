@@ -3,7 +3,7 @@
 source "./efc_lib.sh"
 source "./obscure_lib.sh"
 
-aprint_input_error() {
+print_input_error() {
   echo -e "\nERROR: missing requird inputs [invalid or empty input for $1], exiting. \nUsage:
          \n\t-o | --operation [e = encryption , d = decryption] * Required
          \n\t-s | --source [source folder or file to process] * Required
@@ -96,8 +96,18 @@ start_process() {
       done
     fi
 
-    # construct the index file
-    construct_index_file "$LOCATION" "$INDEX_PASSWORD" "$INDEX_OR_LOCATION"
+
+    if [ -z "$INDEX_OR_LOCATION" ]; then
+        # set the current path to the index location
+        INDEX_OR_LOCATION="$LOCATION"
+    fi
+
+
+    # construct the index file name
+    index_file_name=$(date +%Y%m%d%H%M%S)
+
+    # start index file process
+    construct_index_file "$LOCATION" "$INDEX_PASSWORD" "$INDEX_OR_LOCATION" "$index_file_name"
 
     # obtain the pword for the operation
     echo -e "\n"
@@ -126,7 +136,7 @@ start_process() {
 
     # start the process
     echo -e "\n"
-    reconstruct_index_file "$LOCATION" "$INDEX_PASSWORD"
+    reconstruct_index_file "$INDEX_OR_LOCATION.$index_file_name.asc" "$INDEX_PASSWORD" 
     process_indexed_content $OPERATION "$OPERATION_PASSWORD"
   fi
 

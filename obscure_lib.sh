@@ -30,7 +30,10 @@ obscure_file_name() {
     checksum=$(sha1sum "$1")
     checsum_data=(${checksum//;/ })
     random_name=$(xxd -l 12 -c 12 -p </dev/random)
-    relative_path=$(cd "$(dirname "$1")"; pwd -P)/$(basename "$1")
+    relative_path=$(
+        cd "$(dirname "$1")"
+        pwd -P
+    )/$(basename "$1")
     #$(echo "$1" | cut -f2-)
     local obscured_text="$random_name ;-; ${checsum_data[0]} ;-; "$relative_path" ;-; "
     echo "$obscured_text"
@@ -45,7 +48,7 @@ encrpt_decrypt_index_file() {
         echo -e "INFO :: encrypting the index file into a PGP public key : $1.asc"
         gpg --quiet --yes --batch --passphrase "$2" -a --symmetric --cipher-algo AES256 "$1"
         echo -e "INFO :: removing the index file: $1"
-        rm -rf "$1"
+        #rm -rf "$1"
     else
 
         echo -e "INFO :: decrypting the encrypted index file: $1"
@@ -69,24 +72,26 @@ construct_index_file() {
     # $1 = source folder to search and generate the index file content
     # $2 = pword for the index file
     # $3 = index file destination
+    # $4 = index file name (optional)
 
-    # 1 create the index file.
-    ts=$(date +%Y%m%d%H%M%S)
     index_file=""
-    echo -e "\n"
 
-    if [ -z "${3}" ]; then
-        echo -e "INFO :: index file destination not provided, creating the index file in the source folder : $1"
-        index_file="$1/.$ts"
+    if [ -z "$4" ]; then
+        # 1 create the index file.
+        ts=$(date +%Y%m%d%H%M%S)
+        echo -e "index file name is not provided, using a random file name : $ts"
     else
-        echo -e "INFO :: index file destination provided, creating the index file in : $3"
-        index_file="$3/.$ts"
+        echo -e "index file name is provided, using a the file name : $4"
     fi
 
-    fq_path=$(echo $(
-        cd "$(dirname "$1")"
-        pwd -P
-    )/$(basename "$1"))
+    if [ -z "$3" ]; then
+        echo -e "INFO :: index file destination not provided, creating the index file in the source folder : $1"
+        index_file="$1/.$4"
+    else
+        echo -e "INFO :: index file destination provided, creating the index file in : $3"
+        index_file="$3/.$4"
+    fi
+    fq_path=$(echo "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")")
     echo "$fq_path" >"$index_file"
 
     if test -f "$index_file"; then
@@ -133,28 +138,32 @@ construct_index_file() {
             echo -e "\nINFO :: total of $file_count files processed."
 
             encrpt_decrypt_index_file "$index_file" "$2" "e"
+            echo "herex  $index_file"
+            export INDEX="$index_file"
         }
 }
 
 reconstruct_index_file() {
-    # $1 = encyrpted-index file
+    # $1 = path for a encyrpted-index file
     # $2 = pword for the index file
-    index_file=''
 
-    if [[ -d "$1" ]]; then
-        echo -e "ERROR :: index file can't be a folder : $1"
-        exit
-    elif [[ -f "$1" ]]; then
+    fq_path=$(echo "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")")
+    echo "xxxx $fq_path"
 
-        # decrypt the index file
-        #encrpt_decrypt_file "$1" "$password" "$1" "d"
-        echo "re-constructing the index file ..."
-        encrpt_decrypt_index_file "$1" "$2" "$1" "d"
-        index_file="$1"
-        rm -rf "$1"_out
+    if test -f "$fq_path"; then
+        echo -e "INFO :: index file exists : $fq_path"
     else
-        echo -e '\n' "invalid index file, must be a folder or a file : $1"
+        echo -e "ERROR :: unable to locate the index file on : $fq_path"
+        exit
     fi
+
+    # decrypt the index file
+    #encrpt_decrypt_file "$1" "$password" "$1" "d"
+    echo "re-constructing the index file ..."
+    encrpt_decrypt_index_file "$1" "$2" "$1" "d"
+    index_file="$1"
+    rm -rf "$1"_out
+
 }
 
 decrypt_index_content() {
@@ -256,6 +265,7 @@ encrypt_index_content() {
 process_indexed_content() {
     # $1 = operation (e/d)
     # $2 = password (pword_2)
+    #
 
     # need to set the terminal level variable INDEX
 
@@ -268,7 +278,7 @@ process_indexed_content() {
         echo "no operation is provided, exiting"
         return
     elif [[ "$1" == "e" || "$1" == "d" ]]; then
-        cho "valid operation is provided $1"
+        echo "valid operation is provided $1"
     else
         echo "no valid operation is provided, exiting"
         return
@@ -304,7 +314,7 @@ process_indexed_content() {
             src=$(echo "${obscre_file_details[4]}" | xargs)
 
             if [ $1 == 'e' ]; then
-                echo -e ' \t' "OBS :: file $src -> $fq_path/$des"
+                echo -e ' \t' "OBS :: file $src -> $fq_path$des"
                 echo -e ' \t' "ENC :: file $file"
 
                 encrypt "$src" "${2}" "yes" "$fq_path/$des"
@@ -319,7 +329,7 @@ process_indexed_content() {
                 echo -e ' \t' "OBS :: file $fq_path/$des -> $src"
                 echo -e ' \t' "DEC :: file $file"
 
-                decrypt "$fq_path/$des" "${2}" "yes" "$src"
+                decrypt "$fq_path$des" "${2}" "yes" "$src"
                 # $1 = fq file name
                 # $2 = password
                 # $3 = delete flag (yes/no)
@@ -345,6 +355,6 @@ process_indexed_content() {
     echo -e "\nINFO :: deleting the decrypted index file :  ${INDEX}"
     #rm -rf "${INDEX}"
     if [ $1 == 'e' ]; then
-        echo -e "\t INFO :: please store the index file : ${INDEX}.asc since index file is MANDATORY to decrypt the content."
+        echo -e "\n INFO :: please store the index file : ${INDEX}.asc since index file is REQUIRED to decrypt the content."
     fi
 }

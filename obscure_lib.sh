@@ -303,7 +303,6 @@ process_indexed_content() {
         if [ $is_valid_line == 3 ]; then
 
             IFS=';' read -ra obscre_file_details <<<"$line"
-            # random_text ;-; md5sum ;-; file_name ;-;
 
             DIR="$(dirname "${obscre_file_details[4]}")"
             echo -e "\t\t  obscre_file = $DIR/${obscre_file_details[0]}"
@@ -323,6 +322,10 @@ process_indexed_content() {
                 # $3 = delete flag (yes/no)
                 # $4 = output file name [optional]
 
+                dir_path=$(dirname "$src")
+                echo -e "\nINFO :: deleting the sub-folders :  $fq_path"
+                find "$fq_path" -type d -empty -delete
+
             elif
                 [ $1 == 'd' ]
             then
@@ -336,7 +339,6 @@ process_indexed_content() {
                 # $4 = output file name [optional]
             fi
 
-            #mv "$src" "$des"
             let file_count=file_count+1
             echo "FILE COUNT : $file_count"
 
@@ -348,8 +350,11 @@ process_indexed_content() {
                 echo -e "INFO :: ignoring the line due to content format : $line == $is_valid_line"
             fi
         fi
+
     done \
-        <"${INDEX}"
+        < \
+        \
+        "${INDEX}"
 
     echo -e "\nINFO :: total of $file_count files processed."
     echo -e "\nINFO :: deleting the decrypted index file :  ${INDEX}"

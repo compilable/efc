@@ -22,6 +22,9 @@ decrypt() {
         gpg --quiet --yes --batch --passphrase "$2" "$1" 2>>"$1_out"
     else
         # decrypt to a given file name
+        # create the folder if not exists
+        dir_path=$(dirname "$4")
+        mkdir -p "$dir_path"
         gpg --quiet --yes --batch --output "$4" --passphrase "$2" "$1" 2>>"$1_out"
     fi
 

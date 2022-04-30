@@ -92,7 +92,7 @@ construct_index_file() {
         index_file="$1/.$4"
     else
         echo -e "INFO :: index file destination provided, creating the index file in : $3"
-        index_file="$3.$4"
+        index_file="$3/.$4"
     fi
     fq_path=$(echo "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")")
     echo "$fq_path" >"$index_file"

@@ -48,20 +48,23 @@ encrpt_decrypt_index_file() {
         echo -e "INFO :: encrypting the index file into a PGP public key : $1.asc"
         gpg --quiet --yes --batch --passphrase "$2" -a --symmetric --cipher-algo AES256 "$1"
         echo -e "INFO :: removing the index file: $1"
-        #rm -rf "$1"
+        rm -rf "$1"
     else
 
-        echo -e "INFO :: decrypting the encrypted index file: $1"
-        index_output="$(dirname "${1}")/$(basename "${1%.*}")"
+        trap 'rm -f "$index_output"' EXIT
+        temp_name=$(
+            date +%s | sha256sum | base64 | head -c 8
+            echo
+        )
+        index_output=$(mktemp -t efc_v4.XXXXX$temp_name) || exit 1
+        echo -e "INFO :: decrypting the encrypted index file : $1 to : $index_output"
         gpg --output "$index_output" -quiet --yes --batch --passphrase "$2" -a --decrypt "$1" 2>>"$1_out"
-
         if [ -s "$1_out" ]; then
             echo -e ' \t' "invalid key/file is provided!, index file is ignored!"
             return 0
         else
             echo -e "INFO :: index file is decrypted to : $index_output"
             export INDEX="$index_output"
-
         fi
 
     fi
@@ -89,7 +92,7 @@ construct_index_file() {
         index_file="$1/.$4"
     else
         echo -e "INFO :: index file destination provided, creating the index file in : $3"
-        index_file="$3/.$4"
+        index_file="$3.$4"
     fi
     fq_path=$(echo "$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")")
     echo "$fq_path" >"$index_file"
@@ -265,10 +268,8 @@ encrypt_index_content() {
 process_indexed_content() {
     # $1 = operation (e/d)
     # $2 = password (pword_2)
-    #
 
     # need to set the terminal level variable INDEX
-
     if [ -z "${INDEX}" ]; then
         echo "no index file found, exiting. please run the : reconstruct_index_file() prior to this step."
         return
@@ -282,7 +283,6 @@ process_indexed_content() {
     else
         echo "no valid operation is provided, exiting"
         return
-
     fi
 
     if [ -z "${2}" ]; then
@@ -353,8 +353,6 @@ process_indexed_content() {
 
     echo -e "\nINFO :: total of $file_count files processed."
     echo -e "\nINFO :: deleting the decrypted index file :  ${INDEX}"
-    #rm -rf "${INDEX}"
-    if [ $1 == 'e' ]; then
-        echo -e "\n INFO :: please store the index file : ${INDEX}.asc since index file is REQUIRED to decrypt the content."
-    fi
+    rm -rf "${INDEX}"
+
 }

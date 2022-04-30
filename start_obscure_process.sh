@@ -33,7 +33,6 @@ start_process() {
         exit
       fi
       ;;
-
     -s | --source)
       LOCATION="$2"
       shift # past value
@@ -44,7 +43,6 @@ start_process() {
         print_input_error "--source should be a folder or a file"
         exit
       fi
-
       ;;
     -i | --index)
       INDEX_OR_LOCATION="$2"
@@ -71,7 +69,7 @@ start_process() {
 
     # obtain the pword for the index file
     while true; do
-      echo -n "provide the password to encrypt the index file : "
+      echo -n "provide the password to encrypt/decrypt the index file : "
       read -s INDEX_PASSWORD
 
       if [ -z "$INDEX_PASSWORD" ]; then
@@ -83,31 +81,36 @@ start_process() {
 
     if [ "$OPERATION" == "e" ]; then
 
-      while true; do
-
-        read -sp "Confirm the password :" INDEX_PASSWORD_CONFIRMED
-
-        if [ "$INDEX_PASSWORD" == "$INDEX_PASSWORD_CONFIRMED" ]; then
-          break
-        else
-          echo -e ' \n\t' "password does not match, please confirm the password."
-        fi
-
-      done
-    fi
-
-
-    if [ -z "$INDEX_OR_LOCATION" ]; then
+      if [ -z "$INDEX_OR_LOCATION" ]; then
         # set the current path to the index location
         INDEX_OR_LOCATION="$LOCATION"
+      fi
+
+      # construct the index file name
+      index_file_name=$(date +%Y%m%d%H%M%S)
+
+      # start index file process
+      construct_index_file "$LOCATION" "$INDEX_PASSWORD" "$INDEX_OR_LOCATION" "$index_file_name"
+      # constuct index file
+      echo -e "\n"
+      reconstruct_index_file "$INDEX_OR_LOCATION/.$index_file_name.asc" "$INDEX_PASSWORD"
+
+    else
+
+      if [ -z "$INDEX_OR_LOCATION" ]; then
+        echo -e ' \n\t' "index file needs to be provided for the decryption, exiting"
+        exit
+      fi
+      if [ ! -f "$INDEX_OR_LOCATION" ]; then
+        echo -e ' \n\t' "index file needs to be an existing file, exiting"
+        exit
+      fi
+
+      # constuct index file
+      echo -e "\n"
+      reconstruct_index_file "$INDEX_OR_LOCATION" "$INDEX_PASSWORD"
+
     fi
-
-
-    # construct the index file name
-    index_file_name=$(date +%Y%m%d%H%M%S)
-
-    # start index file process
-    construct_index_file "$LOCATION" "$INDEX_PASSWORD" "$INDEX_OR_LOCATION" "$index_file_name"
 
     # obtain the pword for the operation
     echo -e "\n"
@@ -122,22 +125,11 @@ start_process() {
       fi
     done
 
-    if [ "$OPERATION" == "e" ]; then
-
-      while true; do
-        read -sp "Confirm the encrypt/decrypt password :" OPERATION_PASSWORD_CONFIRMED
-        if [ "$OPERATION_PASSWORD" == "$OPERATION_PASSWORD_CONFIRMED" ]; then
-          break
-        else
-          echo -e ' \n\t' "encrypt/decrypt password does not match, please confirm the password."
-        fi
-      done
-    fi
-
-    # start the process
-    echo -e "\n"
-    reconstruct_index_file "$INDEX_OR_LOCATION.$index_file_name.asc" "$INDEX_PASSWORD" 
     process_indexed_content $OPERATION "$OPERATION_PASSWORD"
+  fi
+
+  if [ "$OPERATION" == "e" ]; then
+    echo -e "\n INFO :: please store the index file : $LOCATION/.$index_file_name.asc since index file is REQUIRED to decrypt the content."
   fi
 
 }

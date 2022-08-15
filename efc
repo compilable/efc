@@ -18,25 +18,25 @@ dependencies_loaded=0
 load_dependencies() {
     # check dependencies exists in current folder, yes -> set variable, no -> read from env. location
     source_path=$(pwd)
-    lib_location="$source_path/efc_lib.sh"
+    lib_location="$source_path/efc_lib"
 
     if [ ! -f "$lib_location" ]; then
 
         # check for the folder path in bash profile
         if [ -z "$EFC_PATH" ]; then
             echo "WARNING: missing the environmen variable EFC_PATH on local bash profile."
-        elif [ ! -f "$EFC_PATH/efc_lib.sh" ]; then
+        elif [ ! -f "$EFC_PATH/efc_lib" ]; then
             echo "WARNING: invalid source is provided in the EFC_PATH. It should be the source location."
         else
             echo "INFO: reading the EFC_PATH from local bash profile : $EFC_PATH"
-            source "$EFC_PATH/efc_lib.sh"
+            source "$EFC_PATH/efc_lib"
             dependencies_loaded=1
         fi
     else
         # setting the EFC_PATH location to execution folder
         export EFC_PATH="$source_path"
         echo "INFO: setting the EFC_PATH to current location : $EFC_PATH"
-        source "$EFC_PATH/efc_lib.sh"
+        source "$EFC_PATH/efc_lib"
         dependencies_loaded=1
     fi
 }
@@ -45,6 +45,12 @@ ts=$(date +%s)
 
 read_password_file() {
     password=$(head -n 1 $1)
+
+    if [ -z "$password" ]; then
+        echo "[error] password can not be empty! make sure password file is accessible and not empty."
+        exit
+    fi
+
 }
 
 accept_task_flag() {
@@ -54,6 +60,7 @@ accept_task_flag() {
         isEnrypt='d'
     else
         echo "[error] invalid task! should be e = for encrypt , d = for decrypt"
+        exit
     fi
 }
 
@@ -273,12 +280,6 @@ if [[ $# -gt 1 ]]; then
     read_password_file "$password_file"
     accept_delete_falg "$delete_source"
     accept_zip_falg "$zip_sub_folders"
-
-    echo "$source"
-    echo "$password"
-    echo "$isEnrypt"
-    echo "$zipFolders"
-    echo "$isDelete"
 
     if [[ -d "$source" ]]; then
         echo "Using the directory : $source"

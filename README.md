@@ -2,18 +2,25 @@
 # Bash Script to symmetrically Encrypt the Files/Folder Content. (EFC)
 
 ## Usage:
-Utility script to encrypt/decrypt a single file(s) or folder tree using standard gpg lib. Supports folder archiving using `tar`.
+Utility script to encrypt/decrypt a single file(s) or folder tree using standard `gpg`. Supports folder archiving using `tar`.
 
 ```bash
-./efc.sh <FOLDER/FILE/PATH>
+efc <FOLDER/FILE/PATH>
 ```
 
 ## Running Tests:
 Use the files inside the `test` folder.
 
+### Intractive mode:
 ```bash
- ./efc.sh test
+efc test/test_data
 ```
+
+### Silent mode:
+```bash
+efc -s test/test_data -t e -p test/password.txt -d yes -z no
+```
+
 
 ## Windows configuration using Git for Windows (Git SCM):
 
@@ -38,7 +45,35 @@ export PATH=$PATH:$EFC_PATH
 
 3. Close and open a new bash shell.
 
-4. Check the instalation by running `efc.sh --version` on a gitbash terminal.
+4. Check how to use the program by running `efc --help` on a gitbash terminal.
+
+## Usage:
+
+
+### Intractive Mode:
+By simply giving a folder or file location as the only parameter, you can start the intractive shell which obtain input from the user.
+
+```bash
+efc /home/user/secret/
+```
+
+### Silent Mode:
+By passing valid parameters, you can start the silent shell..
+
+```bash
+efc -s /home/user/secret/ -t e -p passphrase.txt -d yes -z no
+```
+
+| Option        | Description   | Example       | Default |
+| ------------- | ------------- |-------------  |------------- |
+| -s  | source file/folder to encrypt/decrypt  | test/file.sec  | N/A  |
+| -o  | output file name or folder location  | test/file.sec.gpg  | N/A  |
+| -t  | task to perform either encrypt or decrypt  | e / d  | N/A  |
+| -p  | file containing the passphrase for the operation (only 1st line will be read) MAX 100 chars  | pass.txt  | N/A  |
+| -d  | delete the source file once the task is completed  | yes  | no  |
+| -z  | when encrypting compress the subfolders | no  | no  |
+
+
 
 ## Dependencies:
 - gpg (GnuPG) [2.2.19, 2.2.27]

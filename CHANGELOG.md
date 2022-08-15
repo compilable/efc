@@ -5,6 +5,7 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 ### Added
 - Intractive mode and silent mode to pass options as input parameters.
+- Removed the `sh` extention.
 
 ## EFC - version : 1.0.7 (2022-Feb-04)
 

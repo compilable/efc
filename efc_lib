@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# efc_lib.sh [ encrypt / decrypt files.]
+# efc_lib [ encrypt / decrypt files.]
 # MIT license (MIT)
 
 # functions using the gpg lib to symmetrically encrypt / decrypt individual file.

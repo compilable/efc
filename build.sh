@@ -41,6 +41,6 @@ mkdir -p release
 echo "creating the build.."
 tar -czvf "release/efc_$version.tar.gz" bin/
 
-tar -czvf "release/efc_min_$version.tar.gz" bin/efc_$version.min
+tar -czvf "release/efc_min_$version.tar.gz" bin/efc
 
 echo "build completed for the version : $version"

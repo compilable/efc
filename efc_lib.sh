@@ -113,5 +113,5 @@ print_version_info() {
     echo -e "libgcrypt version : " $(gpg --version | sed -n 2p)
     echo -e "tar version : " $(tar --version | sed -n 1p)
     echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
-    echo -e "Written by compilable"
+    echo -e "Written by compilable."
 }

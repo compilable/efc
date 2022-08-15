@@ -1,6 +1,10 @@
 All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
+## EFC - version : 2.0.0 (2022-Aug-15)
+
+### Added
+- Intractive mode and silent mode to pass options as input parameters.
 
 ## EFC - version : 1.0.7 (2022-Feb-04)
 

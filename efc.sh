@@ -43,6 +43,36 @@ load_dependencies() {
 
 ts=$(date +%s)
 
+read_password_file() {
+    password=$(head -n 1 $1)
+}
+
+accept_task_flag() {
+    if [[ $1 = "e" ]]; then
+        isEnrypt='e'
+    elif [[ $1 = "d" ]]; then
+        isEnrypt='d'
+    else
+        echo "[error] invalid task! should be e = for encrypt , d = for decrypt"
+    fi
+}
+
+accept_zip_falg() {
+    if [[ $1 = "yes" ]]; then
+        zipFolders='yes'
+    else
+        zipFolders='no'
+    fi
+}
+
+accept_delete_falg() {
+    if [[ $1 = "yes" ]]; then
+        isDelete='yes'
+    else
+        isDelete='no'
+    fi
+}
+
 user_input() {
 
     read -p "Delete the source file ? (yes/no) [no] :" isDelete
@@ -141,9 +171,7 @@ process_all_files_in_dir() {
                     ((counter++))
                 fi
             fi
-
         done
-
 }
 
 process_file() {
@@ -158,8 +186,6 @@ process_file() {
 
 }
 
-
-
 zip_folder() {
     if [ "$zipFolders" == 'yes' ]; then
         echo "Start archiving process..."
@@ -167,27 +193,52 @@ zip_folder() {
     fi
 }
 
+print_help() {
+
+    echo -e "\nUsage: efc [FILE/FOLDER] [OPTIONS...] :
+
+Examples:
+\t efc /data/to_encrypt \t# will prompt the user intractive mode.
+\t efc -s /data/to_encrypt -t e -p password.txt -d yes -z no \t# will perfom the encryption task on the given folder.
+
+Intractive mode:
+\t efc [FILE/FOLDER] \t provide the folder path or file directly without other parameters.
+
+Silent mode:
+\t -s | source | source file/folder to encrypt/decrypt.
+\t -o | output | output file name or folder location.
+\t -t | task | task to perform either encrypt or decrypt.
+\t -p | password_file | file containing the password (1st line will be read).
+\t -d | delete_source | once the task is completed: yes, to delete the source file.
+\t -z | zip_sub_folders | when encrypting yes to zip, the subfolders before that task no to avoid compressing."
+}
+
 start_process() {
     if [ $# -eq 0 ]; then
         echo "No folder/file provided, exiting."
         exit 1
-
     elif [[ "$1" == '--version' ]]; then
         print_version_info
         exit 1
-    elif [[ -d "$1" ]]; then
-        echo "Using the directory : $1"
-        user_input "$1"
-        echo -e "\n"
-        zip_folder "$1"
-        echo -e "\n"
-        process_all_files_in_dir "$1"
-    elif [[ -f $1 ]]; then
-        echo "Using the file : $1"
-        user_input $1
-        process_file "$1"
+    elif [[ "$1" == '--help' ]]; then
+        print_help
+        exit 1
     else
-        echo -e '\n' "invalid input, must be a folder or a file : $1"
+
+        if [[ -d "$1" ]]; then
+            echo "Using the directory : $1"
+            user_input "$1"
+            echo -e "\n"
+            zip_folder "$1"
+            echo -e "\n"
+            process_all_files_in_dir "$1"
+        elif [[ -f $1 ]]; then
+            echo "Using the file : $1"
+            user_input $1
+            process_file "$1"
+        else
+            echo -e '\n' "invalid input, must be a folder or a file : $1"
+        fi
     fi
 }
 
@@ -198,4 +249,48 @@ if [ $dependencies_loaded -eq 0 ]; then
     load_dependencies
 fi
 
-start_process "$1"
+if [[ $# -gt 1 ]]; then
+
+    while getopts s:o:t:p:d:z: opts; do
+        case ${opts} in
+        s) source="${OPTARG}" ;;
+        o) output="${OPTARG}" ;;
+        t) operation="${OPTARG}" ;;
+        p) password_file="${OPTARG}" ;;
+        d) delete_source="${OPTARG}" ;;
+        z) zip_sub_folders="${OPTARG}" ;;
+        *)
+            echo -e "[error] invalid parameter, \ntry -help for more information"
+            exit
+            ;;
+        esac
+    done
+
+    # TODO: implement destination file name change
+    echo "$output"
+
+    accept_task_flag "$operation"
+    read_password_file "$password_file"
+    accept_delete_falg "$delete_source"
+    accept_zip_falg "$zip_sub_folders"
+
+    echo "$source"
+    echo "$password"
+    echo "$isEnrypt"
+    echo "$zipFolders"
+    echo "$isDelete"
+
+    if [[ -d "$source" ]]; then
+        echo "Using the directory : $source"
+        zip_folder "$source"
+        process_all_files_in_dir "$source"
+    elif [[ -f "$source" ]]; then
+        echo "Using the file : $source"
+        process_file "$source"
+    else
+        echo -e '\n' "invalid source, must be a folder or a file : $source"
+    fi
+
+else
+    start_process "$1"
+fi

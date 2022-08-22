@@ -143,22 +143,3 @@ ignore_file_folder() {
 #ignore_file_folder "/c/Users/user/Desktop/efc/test/spinner-2x.gif"
 
 #echo $ignore
-
-
-
-# extract from url
-read_from_url(){
-    url=$1
-    output_file=$(mktemp)
-    curl "$url" 2>/dev/null --output "$output_file"
-    line=$(head -n 1 $output_file)
-    rm -f $output_file
-    echo $line
-}
-
-function extract_password(){
-  local res=$(read_from_url $1)
-  echo "pasword "$res
-}
-
-extract_password https://raw.githubusercontent.com/compilable/efc/main/CHANGELOG.md

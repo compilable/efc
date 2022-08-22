@@ -2,6 +2,10 @@ All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 
+## EFC - version : 2.1.1 (2022-Aug-22)
+
+### Added
+- fix : v200 version is throwing an error , path changes added.
 
 ## EFC - version : 2.1.0 (2022-Aug-22)
 

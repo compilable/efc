@@ -1,6 +1,15 @@
 All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
+
+
+## EFC - version : 2.1.0 (2022-Aug-22)
+
+### Added
+- fix : v200 version is throwing an error 
+- feature : read the passphrase from a url or file when using Silent Mode.
+
+
 ## EFC - version : 2.0.0 (2022-Aug-15)
 
 ### Added

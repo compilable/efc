@@ -69,11 +69,34 @@ efc -s /home/user/secret/ -t e -p passphrase.txt -d yes -z no
 | -s  | source file/folder to encrypt/decrypt  | test/file.sec  | N/A  |
 | -o  | output file name or folder location  | test/file.sec.gpg  | N/A  |
 | -t  | task to perform either encrypt or decrypt  | e / d  | N/A  |
-| -p  | file containing the passphrase for the operation (only 1st line will be read) MAX 100 chars  | pass.txt  | N/A  |
+| -p  | file path or URL to a remote file containing the passphrase for the operation (only 1st line will be read) MAX 100 chars  | pass.txt / https://link.me/passwd.md | N/A  |
 | -d  | delete the source file once the task is completed  | yes  | no  |
 | -z  | when encrypting compress the subfolders | no  | no  |
 
 
+## Examples:
+
+#### Silent Mode : Encrypt folder content using a password file.
+
+```bash
+efc -s test/test_data/ -t e -p test/local.passphrase.txt -d yes -z no
+```
+#### Silent Mode : Decrypt folder content using a password file.
+
+```bash
+efc -s test/test_data/ -t d -p test/local.passphrase.txt -d yes -z no
+```
+
+#### Silent Mode : Encrypt folder content using a password file from a URL.
+
+```bash
+efc -s test/test_data/ -t e -p https://raw.githubusercontent.com/compilable/efc/4-read-the-passphrase-from-a-url/test/test_data/remote.passphrase.txt -d yes -z no
+```
+#### Silent Mode : Decrypt folder content using a password file from a URL.
+
+```bash
+efc -s test/test_data/ -t d -p https://raw.githubusercontent.com/compilable/efc/4-read-the-passphrase-from-a-url/test/test_data/remote.passphrase.txt -d yes -z no
+```
 
 ## Dependencies:
 - gpg (GnuPG) [2.2.19, 2.2.27]

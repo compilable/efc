@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source_path=$(pwd)
-source "$source_path/../efc_lib.sh"
+#source "$source_path/../efc_lib.sh"
 
 list_files_with_space() {
     SAVEIFS=$IFS

@@ -98,12 +98,13 @@ zip_all_folders() {
 }
 
 read_version() {
+    execution_path=$(dirname "$0") 
     while IFS= read -r line; do
         if [[ "$line" == ???EFC* ]]; then
             echo -e "\n$line"
             break
         fi
-    done <efc
+    done <"$execution_path/efc"
 }
 
 print_version_info() {

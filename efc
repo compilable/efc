@@ -43,16 +43,6 @@ load_dependencies() {
 
 ts=$(date +%s)
 
-read_password_file() {
-    password=$(head -n 1 $1)
-
-    if [ -z "$password" ]; then
-        echo "[error] password can not be empty! make sure password file is accessible and not empty."
-        exit
-    fi
-
-}
-
 accept_task_flag() {
     if [[ $1 = "e" ]]; then
         isEnrypt='e'
@@ -215,7 +205,7 @@ Silent mode:
 \t -s | source | source file/folder to encrypt/decrypt.
 \t -o | output | output file name or folder location.
 \t -t | task | task to perform either encrypt or decrypt.
-\t -p | password_file | file containing the password (1st line will be read).
+\t -p | password_source | file path or URL to a remote file containing the passphrase (1st line will be read).
 \t -d | delete_source | once the task is completed: yes, to delete the source file.
 \t -z | zip_sub_folders | when encrypting yes to zip, the subfolders before that task no to avoid compressing."
 }
@@ -256,6 +246,7 @@ if [ $dependencies_loaded -eq 0 ]; then
     load_dependencies
 fi
 
+
 if [[ $# -gt 1 ]]; then
 
     while getopts s:o:t:p:d:z: opts; do
@@ -263,7 +254,7 @@ if [[ $# -gt 1 ]]; then
         s) source="${OPTARG}" ;;
         o) output="${OPTARG}" ;;
         t) operation="${OPTARG}" ;;
-        p) password_file="${OPTARG}" ;;
+        p) password_source="${OPTARG}" ;;
         d) delete_source="${OPTARG}" ;;
         z) zip_sub_folders="${OPTARG}" ;;
         *)
@@ -277,7 +268,7 @@ if [[ $# -gt 1 ]]; then
     echo "$output"
 
     accept_task_flag "$operation"
-    read_password_file "$password_file"
+    extract_password "$password_source"
     accept_delete_falg "$delete_source"
     accept_zip_falg "$zip_sub_folders"
 

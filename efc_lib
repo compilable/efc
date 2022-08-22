@@ -139,10 +139,10 @@ function read_from_file() {
 function extract_password() {
     regex='(https?|http|ftp|file)://[-[:alnum:]\+&@#/%?=~_|!:,.;]*[-[:alnum:]\+&@#/%=~_|]'
     if [[ $1 =~ $regex ]]; then
-        echo "[info] read passprase from link.."
+        echo "[info] read passprase from link: $1"
         password=$(read_from_url $1)
     elif [[ -f "$1" ]]; then
-        echo "[info] read passprase from file.."
+        echo "[info] read passprase from file: $1"
         password=$(read_from_file $1)
     fi
 

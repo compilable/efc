@@ -103,7 +103,7 @@ read_version() {
             echo -e "\n$line"
             break
         fi
-    done <CHANGELOG.md
+    done <efc
 }
 
 print_version_info() {

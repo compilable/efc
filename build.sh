@@ -4,6 +4,28 @@
 # build script to release the latest version.
 
 
+extract_version_from_file() {
+
+    file="CHANGELOG.md"
+
+    if [[ -f "$file" ]]; then
+
+        while IFS= read -r line; do
+            if [[ "$line" == ???EFC* ]]; then
+                echo -e "\n$line \n## Source : https://github.com/compilable/efc/ \n## License : The MIT License (MIT)\n## Copyright 2 2002 compilable@tuta.io"
+                break
+            fi
+        done <$file
+
+    else
+        echo -e "\n## EFC - version : unknown. \n## Source : https://github.com/compilable/efc/\n## License : The MIT License (MIT)\n## Copyright 2 2002 compilable@tuta.io"
+                break
+        exit
+    fi
+
+}
+
+
 # 1 remove existing bin folder
 rm -rf bin
 
@@ -27,6 +49,10 @@ cat efc >> "bin/efc_min"
 
 mv bin/efc "bin/efc_$version"
 mv bin/efc_min "bin/efc_$version.min"
+
+# 6 Add version info to the end of the file
+extract_version_from_file >>"bin/efc_$version"
+extract_version_from_file >>"bin/efc_$version.min"
 
 # Make a copy of the min file to be execcuted by calling the efc command
 cp "bin/efc_$version.min" "bin/efc"

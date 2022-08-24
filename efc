@@ -198,6 +198,11 @@ Examples:
 \t efc /data/to_encrypt \t# will prompt the user intractive mode.
 \t efc -s /data/to_encrypt -t e -p password.txt -d yes -z no \t# will perfom the encryption task on the given folder.
 
+Global options :
+\t --help | help | print help options.
+\t --version | version | print current version and dependencies.
+\t --upgrade | upgrade | upgrade to latest version.
+
 Intractive mode:
 \t efc [FILE/FOLDER] \t provide the folder path or file directly without other parameters.
 
@@ -212,7 +217,8 @@ Silent mode:
 
 start_process() {
     if [ $# -eq 0 ]; then
-        echo "No folder/file provided, exiting."
+        echo -e "No folder/file provided, exiting.\n"
+        print_help
         exit 1
     elif [[ "$1" == '--version' ]]; then
         print_version_info
@@ -238,6 +244,8 @@ start_process() {
             process_file "$1"
         else
             echo -e '\n' "invalid input, must be a folder or a file : $1"
+            print_help
+            exit 1
         fi
     fi
 }

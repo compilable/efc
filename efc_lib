@@ -98,7 +98,7 @@ zip_all_folders() {
 }
 
 read_version() {
-    execution_path=$(dirname "$0") 
+    execution_path=$(dirname "$0")
     while IFS= read -r line; do
         if [[ "$line" == ???EFC* ]]; then
             echo -e "\n$line"
@@ -116,7 +116,6 @@ print_version_info() {
     echo -e "\nThere is NO WARRANTY, to the extent permitted by law; licensed under  MIT license (MIT)"
     echo -e "Written by compilable."
 }
-
 
 # extract password from url
 function read_from_url() {

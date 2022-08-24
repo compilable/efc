@@ -220,8 +220,11 @@ start_process() {
     elif [[ "$1" == '--help' ]]; then
         print_help
         exit 1
+    elif [[ "$1" == '--upgrade' ]]; then
+        current_path=$(dirname "$0")
+        upgaded
+        exit 1
     else
-
         if [[ -d "$1" ]]; then
             echo "Using the directory : $1"
             user_input "$1"
@@ -245,7 +248,6 @@ dependencies_loaded=$(file_has_mearged && echo 1 || echo 0)
 if [ $dependencies_loaded -eq 0 ]; then
     load_dependencies
 fi
-
 
 if [[ $# -gt 1 ]]; then
 

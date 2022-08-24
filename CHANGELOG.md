@@ -1,6 +1,13 @@
 All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
+## EFC - version : 2.1.2 (2022-Aug-24)
+
+### Added
+- 9-groom-the-release-package-content 
+
+### Deprecated
+- previous build script/build process.
 
 ## EFC - version : 2.1.1 (2022-Aug-22)
 

@@ -151,3 +151,37 @@ function extract_password() {
         echo "[error] password can not be empty! make sure password file is accessible and not empty."
     fi
 }
+
+# upgrade the current verion to latest rleased verion.
+upgaded() {
+
+    wget -q --spider http://google.com
+
+    if [ $? -eq 0 ]; then
+        echo "[info] obtaining the latest build from github repo."
+        # obtain the latest version
+        curl -s https://api.github.com/repos/compilable/efc/releases/latest |
+            grep "browser_download_url.*.tar.gz" |
+            cut -d : -f 2,3 |
+            tr -d \" |
+            wget -qi -
+
+        tar_file=$(find . -maxdepth 1 -type f -iname "efc_*.tar.gz")
+        if [ -f "$tar_file" ]; then
+            echo "[info] file : $tar_file found, extracting.."
+            tar --extract --file="$tar_file" bin/efc
+
+            # update the current version of efc
+            cp bin/efc efc
+            # remove downloaded files
+            rm -rf bin
+            rm -f "$tar_file"
+            echo "[info] efc is updated to the latet version."
+        else
+            echo "[error] unable to download the latest file, exiting."
+        fi
+    else
+        echo "you need to have connection to github.com, exiting"
+        exit
+    fi
+}

@@ -1,11 +1,16 @@
 All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
+
+## EFC - version : 2.1.5 (2022-Aug-25)
+
+### Fixed
+- upgrade functionality.
+
 ## EFC - version : 2.1.4 (2022-Aug-24)
 
 ### Fixed
 - Help options / readme options 
-
 
 ## EFC - version : 2.1.3 (2022-Aug-24)
 

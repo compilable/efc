@@ -151,36 +151,39 @@ function extract_password() {
     fi
 }
 
-# upgrade the current verion to latest rleased verion.
+# upgrade the current version to latest rleased version.
 upgaded() {
 
-    wget -q --spider http://google.com
+    wget -q --spider http://github.com
 
     if [ $? -eq 0 ]; then
         echo "[info] obtaining the latest build from github repo."
-        # obtain the latest version
-        curl -s https://api.github.com/repos/compilable/efc/releases/latest |
-            grep "browser_download_url.*.tar.gz" |
-            cut -d : -f 2,3 |
-            tr -d \" |
-            wget -qi -
+        # download the latest version to temp location
+        temp_location=$(mktemp -d -t efc-XXXXXXXXXX)
+        eval wget -q $(curl -s https://api.github.com/repos/compilable/efc/releases/latest  | grep browser_download_url | cut -d : -f 2,3) -P $temp_location
 
-        tar_file=$(find . -maxdepth 1 -type f -iname "efc_*.tar.gz")
+        echo $temp_location
+
+        tar_file=$(find $temp_location -maxdepth 1 -type f -iname "efc_*.tar.gz")
+        output_path=$(dirname "$BASH_SOURCE")
+
         if [ -f "$tar_file" ]; then
-            echo "[info] file : $tar_file found, extracting.."
-            tar --extract --file="$tar_file" bin/efc
+            echo "[info] file : $tar_file found, extracting to $output_path"
+            tar -xvf $tar_file -C $output_path
 
             # update the current version of efc
-            cp bin/efc efc
+            cp $output_path/bin/efc "$BASH_SOURCE"
+            
             # remove downloaded files
-            rm -rf bin
-            rm -f "$tar_file"
+            rm -rf $output_path/bin/
+            rm -rf "$temp_location"
+            
             echo "[info] efc is updated to the latet version."
         else
             echo "[error] unable to download the latest file, exiting."
         fi
     else
-        echo "you need to have connection to github.com, exiting"
+        echo "you need to have an internet connection to access github.com, exiting"
         exit
     fi
 }

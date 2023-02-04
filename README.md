@@ -5,7 +5,7 @@
 Utility script written in Bash to encrypt/decrypt file(s) or folder(s) using opensource `gpg encryption`. 
 
 ## Features:
-* Can encrypt folder tress or single folder with content.
+* Recursively encrypt/decrypt folder content or single file.
 * Allow intractive and script (silent) mode to be called from other scripts.
 * Supports folder archiving using `tar`.
 * Allow password files over the network.
@@ -59,28 +59,27 @@ efc -s test/test_data -t e -p test/password.txt -d yes -z no
 
 ## Examples:
 
-#### Silent Mode : Encrypt folder content using a password file.
+#### Silent Mode : Recursively encrypt folder content using a password file.
 
 ```bash
-efc -s test/test_data/ -t e -p test/local.passphrase.txt -d yes -z no
+efc -s test/test_data/ -o test/output_folder -t e -p test/local.passphrase.txt -d yes -z no
 ```
-#### Silent Mode : Decrypt folder content using a password file.
+#### Silent Mode : Recursively decrypt folder content using a password file.
 
 ```bash
-efc -s test/test_data/ -t d -p test/local.passphrase.txt -d yes -z no
+efc -s test/output_folder -o test/test_data/ -t d -p test/local.passphrase.txt -d yes -z no
 ```
 
 #### Silent Mode : Encrypt folder content using a password file from a URL.
 
 ```bash
-efc -s test/test_data/ -t e -p https://raw.githubusercontent.com/compilable/efc/4-read-the-passphrase-from-a-url/test/test_data/remote.passphrase.txt -d yes -z no
+efc -s test/test_data/ -o test/output_folder -t e -p https://raw.githubusercontent.com/compilable/efc/main/test/local.passphrase.txt -d yes -z no
 ```
 #### Silent Mode : Decrypt folder content using a password file from a URL.
 
 ```bash
-efc -s test/test_data/ -t d -p https://raw.githubusercontent.com/compilable/efc/4-read-the-passphrase-from-a-url/test/test_data/remote.passphrase.txt -d yes -z no
+efc -s test/output_folder/ -o test/test_data -t d -p https://raw.githubusercontent.com/compilable/efc/main/test/local.passphrase.txt -d yes
 ```
-
 
 
 ## Windows configuration using Git for Windows (Git SCM):

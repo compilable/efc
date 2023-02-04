@@ -1,6 +1,14 @@
 All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
+## EFC - version : 2.1.6 (2023-Feb-05)
+
+### Added
+- ability to specify output location/file.
+
+### Fixed
+- logs optimized.
+- redme updated.
 
 ## EFC - version : 2.1.5 (2022-Aug-25)
 

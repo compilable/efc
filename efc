@@ -184,7 +184,6 @@ process_all_files_in_dir() {
                 if [[ $isEnrypt == 'e' ]]; then
                     echo "[info] ENC the file : $1"
                     OUTPUT_FILE="$OUTPUT_DIR/$relative_path/$src_name.$ENCRYPTED_FILE_EXT"
-                    #echo "OUTD :: $OUTPUT_FILE"
                     encrypt "$file" "$password" $isDelete "$OUTPUT_FILE"
                     #increase_count $?
                     ((counter++))
@@ -194,7 +193,6 @@ process_all_files_in_dir() {
                     echo "[info] DEC the file : $1"
                     src_name="${src_name%.*}"
                     OUTPUT_FILE="$OUTPUT_DIR/$relative_path/$src_name"
-                    #echo "OUTD :: $OUTPUT_FILE"
                     decrypt "$file" "$password" $isDelete "$OUTPUT_FILE"
                     ((counter++))
                 fi

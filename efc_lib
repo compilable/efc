@@ -18,20 +18,16 @@ decrypt() {
     local return_status=0
 
     if [ -z "${4}" ]; then
-        # decrypt to the same file name
+        echo -e "\t decrypting the file : $1"
         gpg --quiet --yes --batch --passphrase "$2" "$1" 2>>"$1_out"
     else
-        # decrypt to a given file name
-        # create the folder if not exists
-        dir_path=$(dirname "$4")
-        mkdir -p "$dir_path"
+        echo -e "\t decrypting the file : $1 -> $4"
         gpg --quiet --yes --batch --output "$4" --passphrase "$2" "$1" 2>>"$1_out"
     fi
 
     if [ -s "$1_out" ]; then
         echo -e ' \t' "invalid key/file is provided!, file is ignored!"
     else
-
         if [ $3 == 'yes' ]; then
             echo -e ' \t' "removing the original file $1"
             rm -rf "$1"
@@ -50,13 +46,11 @@ encrypt() {
     # $3 = delete flag (yes/no)
     # $4 = output file name [optional]
 
-    echo -e ' \t' "encrypting the file: $1"
-
     if [ -z "${4}" ]; then
-        # encrypt to the same file name.gpg
+        echo -e "\t encrypting the file : $1"
         gpg --quiet --yes --batch --passphrase "$2" -c "$1"
     else
-        # encrypt to a given file name
+        echo -e "\t encrypting the file : $1 -> $4"
         gpg --quiet --yes --batch --output "$4" --passphrase "$2" -c "$1"
     fi
 
@@ -80,7 +74,7 @@ remove_zip_after_verify() {
 }
 
 zip_all_folders() {
-
+echo
     find "$1" -print |
         while read file; do
 
@@ -160,7 +154,7 @@ upgaded() {
         echo "[info] obtaining the latest build from github repo."
         # download the latest version to temp location
         temp_location=$(mktemp -d -t efc-XXXXXXXXXX)
-        eval wget -q $(curl -s https://api.github.com/repos/compilable/efc/releases/latest  | grep browser_download_url | cut -d : -f 2,3) -P $temp_location
+        eval wget -q $(curl -s https://api.github.com/repos/compilable/efc/releases/latest | grep browser_download_url | cut -d : -f 2,3) -P $temp_location
 
         echo $temp_location
 
@@ -173,11 +167,11 @@ upgaded() {
 
             # update the current version of efc
             cp $output_path/bin/efc "$BASH_SOURCE"
-            
+
             # remove downloaded files
             rm -rf $output_path/bin/
             rm -rf "$temp_location"
-            
+
             echo "[info] efc is updated to the latet version."
         else
             echo "[error] unable to download the latest file, exiting."

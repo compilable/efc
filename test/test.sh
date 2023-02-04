@@ -97,7 +97,7 @@ check_path() {
     elif [[ -d "$1" ]]; then
         echo "Using the directory : $1"
     elif [[ -f $1 ]]; then
-        echo "Using the file : $1"
+        echo "processing the file : $1"
     else
         echo "invalid input, must be a folder or a file : $1"
     fi

@@ -14,6 +14,8 @@ Features:
 
 # Load the util functions
 dependencies_loaded=0
+# TODO: support collecting the output extention from user input.
+ENCRYPTED_FILE_EXT='gpg'
 
 load_dependencies() {
     # check dependencies exists in current folder, yes -> set variable, no -> read from env. location
@@ -145,18 +147,46 @@ user_input() {
 }
 
 process_all_files_in_dir() {
+
+    if [ -z "${2}" ]; then
+        echo "output location is not provided, using the same location of the source file."
+        OUTPUT_DIR="$1"
+    else
+        # create the folder if not exists
+        mkdir -p "$2"
+        if test -d "${2}"; then
+            OUTPUT_DIR="$2"
+            echo "output location is provided, using the location: $OUTPUT_DIR"
+        else
+            echo "output location is invalid, using the same location of the source file."
+        fi
+    fi
+
     find "$1" -print |
         while read file; do
             echo "FILE :: $file"
 
             if [[ -d $file ]]; then
+
                 echo "Insdie : DIR  $file"
+                # create the folder in output location if OUTPUT_DIR is provided
+                relative_path=$(realpath --relative-to="$1" "$file")
+                echo "xxxxxxxxxxxx $OUTPUT_DIR/$relative_path"
+                mkdir -p "$OUTPUT_DIR/$relative_path"
             else
 
+                # generate the file name if OUTPUT_DIR is provided
+                src_name=$(basename "$file")
+                src_path=$(dirname "$file")
+                relative_path=$(realpath --relative-to="$1" "$src_path")
+                # remove . path from relative path
+                #relative_path="${relative_path//./""}"
+
                 if [[ $isEnrypt == 'e' ]]; then
-                    #encrypt "$file" "$password" $isDelete
                     echo "ENC" $file
-                    encrypt "$file" "$password" $isDelete
+                    OUTPUT_FILE="$OUTPUT_DIR/$relative_path/$src_name.$ENCRYPTED_FILE_EXT"
+                    echo "OUTD :: $OUTPUT_FILE"
+                    encrypt "$file" "$password" $isDelete "$OUTPUT_FILE"
                     #increase_count $?
                     ((counter++))
                 fi
@@ -164,21 +194,45 @@ process_all_files_in_dir() {
                 if [[ $isEnrypt == 'd' ]]; then
 
                     echo "DEC" $file
-                    decrypt "$file" "$password" $isDelete
+                    src_name="${src_name%.*}"
+                    OUTPUT_FILE="$OUTPUT_DIR/$relative_path/$src_name"
+                    echo "OUTD :: $OUTPUT_FILE"
+                    decrypt "$file" "$password" $isDelete "$OUTPUT_FILE"
                     ((counter++))
                 fi
             fi
         done
 }
 
+handle_output_location() {
+    # $1 - src locatoin
+    # $2 - output location
+
+    if [ -z "${2}" ]; then
+        echo "output location is not provided, using the same location of the source file."
+        OUTPUT_DIR="$1"
+    else
+        dir_path=$(dirname "$2")
+        # create the folder if not exists
+        mkdir -p "$dir_path"
+        if test -d "${2}"; then
+            OUTPUT_DIR="$2"
+            echo "output location is provided, using the location: $OUTPUT_DIR"
+
+        fi
+    fi
+}
+
 process_file() {
 
+    handle_output_location "$1" "$2"
+
     if [[ $isEnrypt == 'e' ]]; then
-        encrypt "$1" "$password" $isDelete
+        encrypt "$1" "$password" $isDelete "$2"
     fi
 
     if [[ $isEnrypt == 'd' ]]; then
-        decrypt "$1" "$password" $isDelete
+        decrypt "$1" "$password" $isDelete "$2"
     fi
 
 }
@@ -237,11 +291,11 @@ start_process() {
             echo -e "\n"
             zip_folder "$1"
             echo -e "\n"
-            process_all_files_in_dir "$1"
+            process_all_files_in_dir "$1" "$2"
         elif [[ -f $1 ]]; then
             echo "Using the file : $1"
             user_input $1
-            process_file "$1"
+            process_file "$1" "$2"
         else
             echo -e '\n' "invalid input, must be a folder or a file : $1"
             print_help
@@ -285,14 +339,14 @@ if [[ $# -gt 1 ]]; then
     if [[ -d "$source" ]]; then
         echo "Using the directory : $source"
         zip_folder "$source"
-        process_all_files_in_dir "$source"
+        process_all_files_in_dir "$source" "$output"
     elif [[ -f "$source" ]]; then
         echo "Using the file : $source"
-        process_file "$source"
+        process_file "$source" "$output"
     else
         echo -e '\n' "invalid source, must be a folder or a file : $source"
     fi
 
 else
-    start_process "$1"
+    start_process "$1" "$output"
 fi

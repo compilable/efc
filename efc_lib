@@ -22,9 +22,6 @@ decrypt() {
         gpg --quiet --yes --batch --passphrase "$2" "$1" 2>>"$1_out"
     else
         # decrypt to a given file name
-        # create the folder if not exists
-        dir_path=$(dirname "$4")
-        mkdir -p "$dir_path"
         gpg --quiet --yes --batch --output "$4" --passphrase "$2" "$1" 2>>"$1_out"
     fi
 
@@ -53,10 +50,10 @@ encrypt() {
     echo -e ' \t' "encrypting the file: $1"
 
     if [ -z "${4}" ]; then
-        # encrypt to the same file name.gpg
+        echo "encrypt to the same file name.gpg"
         gpg --quiet --yes --batch --passphrase "$2" -c "$1"
     else
-        # encrypt to a given file name
+        echo "encrypt to a given file name $4"
         gpg --quiet --yes --batch --output "$4" --passphrase "$2" -c "$1"
     fi
 
@@ -160,7 +157,7 @@ upgaded() {
         echo "[info] obtaining the latest build from github repo."
         # download the latest version to temp location
         temp_location=$(mktemp -d -t efc-XXXXXXXXXX)
-        eval wget -q $(curl -s https://api.github.com/repos/compilable/efc/releases/latest  | grep browser_download_url | cut -d : -f 2,3) -P $temp_location
+        eval wget -q $(curl -s https://api.github.com/repos/compilable/efc/releases/latest | grep browser_download_url | cut -d : -f 2,3) -P $temp_location
 
         echo $temp_location
 
@@ -173,11 +170,11 @@ upgaded() {
 
             # update the current version of efc
             cp $output_path/bin/efc "$BASH_SOURCE"
-            
+
             # remove downloaded files
             rm -rf $output_path/bin/
             rm -rf "$temp_location"
-            
+
             echo "[info] efc is updated to the latet version."
         else
             echo "[error] unable to download the latest file, exiting."

@@ -21,3 +21,5 @@ Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 ### Mac OS suppport - update readme
 
 ### Create a SH/BAT file inside the root folder, once clicked will start decrypting the content.
+
+### Support output file format when encrypting the whole folder. 

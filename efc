@@ -30,14 +30,14 @@ load_dependencies() {
         elif [ ! -f "$EFC_PATH/efc_lib" ]; then
             echo "WARNING: invalid source is provided in the EFC_PATH. It should be the source location."
         else
-            echo "INFO: reading the EFC_PATH from local bash profile : $EFC_PATH"
+            echo "[info]reading the EFC_PATH from local bash profile : $EFC_PATH"
             source "$EFC_PATH/efc_lib"
             dependencies_loaded=1
         fi
     else
         # setting the EFC_PATH location to execution folder
         export EFC_PATH="$source_path"
-        echo "INFO: setting the EFC_PATH to current location : $EFC_PATH"
+        echo "[info] setting the EFC_PATH to current location : $EFC_PATH"
         source "$EFC_PATH/efc_lib"
         dependencies_loaded=1
     fi
@@ -149,29 +149,28 @@ user_input() {
 process_all_files_in_dir() {
 
     if [ -z "${2}" ]; then
-        echo "output location is not provided, using the same location of the source file."
+        echo "[info] output location is not provided, using the same location of the source file."
         OUTPUT_DIR="$1"
     else
         # create the folder if not exists
         mkdir -p "$2"
         if test -d "${2}"; then
             OUTPUT_DIR="$2"
-            echo "output location is provided, using the location: $OUTPUT_DIR"
+            echo "[info] output location is provided, using the location: $OUTPUT_DIR"
         else
-            echo "output location is invalid, using the same location of the source file."
+            echo "[info] output location is invalid, using the source location."
         fi
     fi
 
     find "$1" -print |
         while read file; do
-            echo "FILE :: $file"
+            #echo "FILE :: $file"
 
             if [[ -d $file ]]; then
 
-                echo "Insdie : DIR  $file"
+                #echo "Insdie : DIR  $file"
                 # create the folder in output location if OUTPUT_DIR is provided
                 relative_path=$(realpath --relative-to="$1" "$file")
-                echo "xxxxxxxxxxxx $OUTPUT_DIR/$relative_path"
                 mkdir -p "$OUTPUT_DIR/$relative_path"
             else
 
@@ -183,20 +182,19 @@ process_all_files_in_dir() {
                 #relative_path="${relative_path//./""}"
 
                 if [[ $isEnrypt == 'e' ]]; then
-                    echo "ENC" $file
+                    echo "[info] ENC the file : $1"
                     OUTPUT_FILE="$OUTPUT_DIR/$relative_path/$src_name.$ENCRYPTED_FILE_EXT"
-                    echo "OUTD :: $OUTPUT_FILE"
+                    #echo "OUTD :: $OUTPUT_FILE"
                     encrypt "$file" "$password" $isDelete "$OUTPUT_FILE"
                     #increase_count $?
                     ((counter++))
                 fi
 
                 if [[ $isEnrypt == 'd' ]]; then
-
-                    echo "DEC" $file
+                    echo "[info] DEC the file : $1"
                     src_name="${src_name%.*}"
                     OUTPUT_FILE="$OUTPUT_DIR/$relative_path/$src_name"
-                    echo "OUTD :: $OUTPUT_FILE"
+                    #echo "OUTD :: $OUTPUT_FILE"
                     decrypt "$file" "$password" $isDelete "$OUTPUT_FILE"
                     ((counter++))
                 fi
@@ -209,16 +207,13 @@ handle_output_location() {
     # $2 - output location
 
     if [ -z "${2}" ]; then
-        echo "output location is not provided, using the same location of the source file."
-        OUTPUT_DIR="$1"
+        echo "[info] output file name is not provided, using the same location to store the generated file."
     else
         dir_path=$(dirname "$2")
-        # create the folder if not exists
+        # create the root folder if not exists
         mkdir -p "$dir_path"
         if test -d "${2}"; then
-            OUTPUT_DIR="$2"
-            echo "output location is provided, using the location: $OUTPUT_DIR"
-
+            echo "[info] output file name is provided: $2"
         fi
     fi
 }
@@ -262,7 +257,7 @@ Intractive mode:
 
 Silent mode:
 \t -s | source | source file/folder to encrypt/decrypt.
-\t -o | output | output file name or folder location.
+\t -o | output | full path of the output file for single files / full folder path of for recursive folders .
 \t -t | task | task to perform either encrypt or decrypt.
 \t -p | password_source | file path or URL to a remote file containing the passphrase (1st line will be read).
 \t -d | delete_source | once the task is completed: yes, to delete the source file.
@@ -271,7 +266,7 @@ Silent mode:
 
 start_process() {
     if [ $# -eq 0 ]; then
-        echo -e "No folder/file provided, exiting.\n"
+        echo "[warn] No folder/file provided, exiting.\n"
         print_help
         exit 1
     elif [[ "$1" == '--version' ]]; then
@@ -286,18 +281,18 @@ start_process() {
         exit 1
     else
         if [[ -d "$1" ]]; then
-            echo "Using the directory : $1"
+            echo "[info] using the directory : $1"
             user_input "$1"
             echo -e "\n"
             zip_folder "$1"
             echo -e "\n"
             process_all_files_in_dir "$1" "$2"
         elif [[ -f $1 ]]; then
-            echo "Using the file : $1"
+            echo "[info] processing the file : $1"
             user_input $1
             process_file "$1" "$2"
         else
-            echo -e '\n' "invalid input, must be a folder or a file : $1"
+            echo -e '\n' "[warn] invalid input, must be a folder or a file : $1"
             print_help
             exit 1
         fi
@@ -328,23 +323,20 @@ if [[ $# -gt 1 ]]; then
         esac
     done
 
-    # TODO: implement destination file name change
-    echo "$output"
-
     accept_task_flag "$operation"
     extract_password "$password_source"
     accept_delete_falg "$delete_source"
     accept_zip_falg "$zip_sub_folders"
 
     if [[ -d "$source" ]]; then
-        echo "Using the directory : $source"
+        echo "[info] using the directory : $source"
         zip_folder "$source"
         process_all_files_in_dir "$source" "$output"
     elif [[ -f "$source" ]]; then
-        echo "Using the file : $source"
+        echo "[info] processing the file : $source"
         process_file "$source" "$output"
     else
-        echo -e '\n' "invalid source, must be a folder or a file : $source"
+            echo -e '\n' "[warn] invalid input, must be a folder or a file : $source"
     fi
 
 else

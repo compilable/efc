@@ -326,6 +326,15 @@ if [[ $# -gt 1 ]]; then
     accept_delete_falg "$delete_source"
     accept_zip_falg "$zip_sub_folders"
 
+    # format path if OS is windows.
+	if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then	
+		source=$(echo "/$source" | sed 's/\\/\//g' | sed 's/://')
+		output=$(echo "/$output" | sed 's/\\/\//g' | sed 's/://')
+		#convert the driver leter to lower case.
+		source="$(tr '[:upper:]' '[:lower:]' <<< ${source:0:3})${source:3}"
+		output="$(tr '[:upper:]' '[:lower:]' <<< ${output:0:2})${output:2}"
+	fi
+    
     if [[ -d "$source" ]]; then
         echo "[info] using the directory : $source"
         zip_folder "$source"

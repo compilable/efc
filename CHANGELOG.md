@@ -1,6 +1,13 @@
 All notable changes to this project will be documented in this file.
 Versioning based on [Semantic Versioning 2.0.0](http://semver.org/) format.
 
+## EFC - version : 2.1.7 (2023-Feb-12)
+
+### Added
+- able to upgrade to the latest version.
+### Fixed
+- output location is not correctly generated when using Windows
+
 ## EFC - version : 2.1.6 (2023-Feb-05)
 
 ### Added

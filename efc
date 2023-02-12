@@ -275,7 +275,7 @@ start_process() {
         exit 1
     elif [[ "$1" == '--upgrade' ]]; then
         current_path=$(dirname "$0")
-        upgaded
+        upgrade_to_latest_from_remote
         exit 1
     else
         if [[ -d "$1" ]]; then

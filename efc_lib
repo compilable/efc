@@ -145,8 +145,8 @@ function extract_password() {
     fi
 }
 
-# upgrade the current version to latest rleased version.
-upgaded() {
+# upgrade the current version to latest relased version.
+upgrade_to_latest_from_remote() {
 
     wget -q --spider http://github.com
 
@@ -156,28 +156,32 @@ upgaded() {
         temp_location=$(mktemp -d -t efc-XXXXXXXXXX)
         eval wget -q $(curl -s https://api.github.com/repos/compilable/efc/releases/latest | grep browser_download_url | cut -d : -f 2,3) -P $temp_location
 
-        echo $temp_location
-
         tar_file=$(find $temp_location -maxdepth 1 -type f -iname "efc_*.tar.gz")
-        output_path=$(dirname "$BASH_SOURCE")
+        output_path=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+        echo "[info] : efc installed location : $output_path"
 
         if [ -f "$tar_file" ]; then
             echo "[info] file : $tar_file found, extracting to $output_path"
-            tar -xvf $tar_file -C $output_path
+            mkdir -p "$output_path/.new"
+            tar -xvf $tar_file --directory "$output_path/.new" 
 
-            # update the current version of efc
-            cp $output_path/bin/efc "$BASH_SOURCE"
+            # override with the latest version
+            echo '' > "$output_path/efc"
+            cat "$output_path/.new/bin/efc" > "$output_path/efc"
+            cat "$output_path/.new/bin/License" > "$output_path/License"
+            cat "$output_path/.new/bin/README.md" > "$output_path/README.md"
 
             # remove downloaded files
-            rm -rf $output_path/bin/
+            rm -rf "$output_path/.new/"
             rm -rf "$temp_location"
 
-            echo "[info] efc is updated to the latet version."
+            echo -e "[info] efc is updated to the latet version: ▶ ▶ ▶ " '\n'
+            ./efc --version
         else
             echo "[error] unable to download the latest file, exiting."
         fi
     else
-        echo "you need to have an internet connection to access github.com, exiting"
+        echo "unable to access github.com, check the internet connection or proxy settings, exiting"
         exit
     fi
 }
